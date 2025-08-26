@@ -30,8 +30,7 @@ export class OpenAIService {
               content: prompt
             }
           ],
-          temperature: 0,
-          max_tokens: 1000
+          max_completion_tokens: 20000
         })
       });
 
