@@ -33,68 +33,57 @@ export class FormDetector {
     const forms: FormInfo[] = [];
     const processedElements = new Set<Element>();
 
-    // 1. Detect actual <form> elements
-    const formElements = document.querySelectorAll('form');
-    formElements.forEach((form) => {
-      const inputs = this.getEligibleInputs(form);
+    // Use DFS to detect forms and form-like containers at each level
+    this.dfsDetectForms(document.body, forms, processedElements);
+
+    return forms;
+  }
+
+  private dfsDetectForms(element: Element, forms: FormInfo[], processedElements: Set<Element>): void {
+    // Skip if already processed
+    if (processedElements.has(element)) return;
+
+    // 1. Check if this is a form element
+    if (element.tagName === 'FORM') {
+      const inputs = this.getDirectInputs(element);
       if (inputs.length > 1) {
         forms.push({
-          element: form as HTMLElement,
+          element: element as HTMLElement,
           type: 'form',
           inputs
         });
-        processedElements.add(form);
-
-        // Mark all inputs as processed to avoid double-detection
+        processedElements.add(element);
         inputs.forEach(input => processedElements.add(input));
       }
-    });
+    }
+    // 2. Check if this is a form-like container
+    else if (this.isFormLikeContainer(element)) {
+      const inputs = this.getDirectInputs(element);
+      if (inputs.length >= 2 && this.hasFormLikeInputs(inputs)) {
+        forms.push({
+          element: element as HTMLElement,
+          type: 'container',
+          inputs
+        });
+        processedElements.add(element);
+        inputs.forEach(input => processedElements.add(input));
+        (element as HTMLElement).setAttribute('data-llm-autofill-processed', 'true');
+      }
+    }
 
-    // 2. Detect form-like containers outside of forms
-    const containerSelectors = ['div', 'section', 'fieldset', 'main', 'article'];
+    // 3. Recursively process children (DFS)
+    for (let i = 0; i < element.children.length; i++) {
+      this.dfsDetectForms(element.children[i], forms, processedElements);
+    }
+  }
 
-    containerSelectors.forEach((selector) => {
-      const containers = document.querySelectorAll(selector);
-      containers.forEach((container) => {
-        // Skip if already processed
-        if (processedElements.has(container)) return;
+  private isFormLikeContainer(element: Element): boolean {
+    // Skip navigation/filter containers
+    if (this.isNavigationContainer(element)) return false;
 
-        // Skip if inside a form
-        if (container.closest('form')) return;
-
-        // Skip if already processed by attribute
-        if (container.hasAttribute('data-llm-autofill-processed')) return;
-
-        // Skip navigation/filter containers
-        if (this.isNavigationContainer(container)) return;
-
-        const inputs = this.getEligibleInputs(container);
-
-        // Only process if has inputs that aren't already part of a detected form
-        const unprocessedInputs = inputs.filter(input => !processedElements.has(input));
-
-        // Check if inputs look like actual form fields
-        if (unprocessedInputs.length >= 2 && this.hasFormLikeInputs(unprocessedInputs)) {
-          // Check if this container would be a subset of an already detected form
-          const wouldBeDuplicate = forms.some(existingForm =>
-            existingForm.element.contains(container) || container.contains(existingForm.element)
-          );
-
-          if (!wouldBeDuplicate) {
-            forms.push({
-              element: container as HTMLElement,
-              type: 'container',
-              inputs: unprocessedInputs
-            });
-            processedElements.add(container);
-            unprocessedInputs.forEach(input => processedElements.add(input));
-            container.setAttribute('data-llm-autofill-processed', 'true');
-          }
-        }
-      });
-    });
-
-    return forms;
+    // Only consider these container types
+    const containerTags = ['DIV', 'SECTION', 'FIELDSET', 'MAIN', 'ARTICLE'];
+    return containerTags.includes(element.tagName);
   }
 
   public getEligibleInputs(container: Element): HTMLInputElement[] {
@@ -114,6 +103,25 @@ export class FormDetector {
              htmlInput.type !== 'radio' &&
              htmlInput.type !== 'checkbox';
     }) as HTMLInputElement[];
+  }
+
+  // Get only direct inputs, excluding those in nested forms/containers
+  private getDirectInputs(container: Element): HTMLInputElement[] {
+    const allInputs = this.getEligibleInputs(container);
+    const nestedInputs = new Set<HTMLInputElement>();
+
+    // Find all nested forms and containers that could have inputs
+    const nestedSelectors = ['form', 'div', 'section', 'fieldset', 'main', 'article'];
+    nestedSelectors.forEach(selector => {
+      const nestedElements = container.querySelectorAll(`:scope > ${selector}`);
+      nestedElements.forEach(nestedElement => {
+        const inputs = this.getEligibleInputs(nestedElement);
+        inputs.forEach(input => nestedInputs.add(input));
+      });
+    });
+
+    // Return only inputs that are direct children, not in nested elements
+    return allInputs.filter(input => !nestedInputs.has(input));
   }
 
   private isNavigationContainer(container: Element): boolean {
