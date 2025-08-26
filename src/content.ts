@@ -49,7 +49,7 @@ class ContentScript {
 
   private detectAndInjectButtons() {
     const forms = this.formDetector.detectForms();
-
+    console.log('Forms detected:', forms);
     forms.forEach((formInfo) => {
       if (!this.uiManager.hasExistingButton(formInfo.element)) {
         this.uiManager.injectButton(formInfo, () => this.formFiller.handleAutofill(formInfo));
