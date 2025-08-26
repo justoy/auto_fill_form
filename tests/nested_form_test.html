@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nested Forms Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-container { border: 2px solid #333; margin: 20px; padding: 20px; }
+        .nested-form { border: 2px solid #666; margin: 10px; padding: 15px; background-color: #f5f5f5; }
+        .form-like { border: 2px dashed #999; margin: 10px; padding: 10px; background-color: #efefef; }
+        input, textarea { margin: 5px 0; padding: 5px; width: 200px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Nested Forms Test Page</h1>
+    <p>This page tests the form detection with nested forms. Only the innermost forms should be detected.</p>
+
+    <!-- Test Case 1: Large form with nested smaller forms -->
+    <div class="form-container">
+        <h2>Test Case 1: Large Form with Nested Small Forms</h2>
+        <form id="large-form" action="/submit-large" method="post">
+            <label>Large Form Field 1:</label>
+            <input type="text" name="large_field1" placeholder="This should NOT be detected">
+            
+            <label>Large Form Field 2:</label>
+            <input type="email" name="large_email" placeholder="Large form email">
+
+            <!-- Nested small form 1 -->
+            <div class="nested-form">
+                <h3>Nested Personal Info Form</h3>
+                <form id="personal-info" action="/submit-personal" method="post">
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" placeholder="Enter first name" required>
+                    
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" placeholder="Enter last name" required>
+                    
+                    <label>Email:</label>
+                    <input type="email" name="email" placeholder="Enter email" required>
+                    
+                    <button type="submit">Submit Personal Info</button>
+                </form>
+            </div>
+
+            <!-- Nested small form 2 -->
+            <div class="nested-form">
+                <h3>Nested Address Form</h3>
+                <form id="address-form" action="/submit-address" method="post">
+                    <label>Street Address:</label>
+                    <input type="text" name="street" placeholder="Enter street address" required>
+                    
+                    <label>City:</label>
+                    <input type="text" name="city" placeholder="Enter city" required>
+                    
+                    <label>ZIP Code:</label>
+                    <input type="text" name="zip" placeholder="Enter ZIP code" required>
+                    
+                    <button type="submit">Submit Address</button>
+                </form>
+            </div>
+
+            <label>Large Form Final Field:</label>
+            <textarea name="large_comments" placeholder="Comments for large form"></textarea>
+            
+            <button type="submit">Submit Large Form</button>
+        </form>
+    </div>
+
+    <!-- Test Case 2: Form-like container with nested form-like containers -->
+    <div class="form-container">
+        <h2>Test Case 2: Form-like Container with Nested Form-like Containers</h2>
+        <div id="large-container" class="form-like">
+            <label>Container Field 1:</label>
+            <input type="text" name="container_field1" placeholder="This should NOT be detected">
+            
+            <label>Container Field 2:</label>
+            <input type="tel" name="container_phone" placeholder="Container phone">
+
+            <!-- Nested form-like container 1 -->
+            <div id="billing-container" class="form-like">
+                <h3>Billing Information</h3>
+                <label>Card Number:</label>
+                <input type="text" name="card_number" placeholder="Enter card number" required>
+                
+                <label>Cardholder Name:</label>
+                <input type="text" name="cardholder_name" placeholder="Enter cardholder name" required>
+                
+                <label>Expiry Date:</label>
+                <input type="text" name="expiry" placeholder="MM/YY" required>
+            </div>
+
+            <!-- Nested form-like container 2 -->
+            <div id="shipping-container" class="form-like">
+                <h3>Shipping Information</h3>
+                <label>Shipping Address:</label>
+                <input type="text" name="shipping_address" placeholder="Enter shipping address" required>
+                
+                <label>Phone Number:</label>
+                <input type="tel" name="shipping_phone" placeholder="Enter phone number" required>
+                
+                <label>Special Instructions:</label>
+                <textarea name="shipping_notes" placeholder="Special delivery instructions"></textarea>
+            </div>
+
+            <label>Container Final Field:</label>
+            <input type="text" name="container_final" placeholder="Final container field">
+        </div>
+    </div>
+
+    <!-- Test Case 3: Standalone forms (should be detected) -->
+    <div class="form-container">
+        <h2>Test Case 3: Standalone Forms (Should be detected)</h2>
+        
+        <form id="login-form" action="/login" method="post" class="nested-form">
+            <h3>Login Form</h3>
+            <label>Username:</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+            
+            <label>Password:</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+
+        <div id="registration-container" class="form-like">
+            <h3>Registration Container</h3>
+            <label>Full Name:</label>
+            <input type="text" name="full_name" placeholder="Enter full name" required>
+            
+            <label>Email Address:</label>
+            <input type="email" name="reg_email" placeholder="Enter email" required>
+            
+            <label>Password:</label>
+            <input type="password" name="reg_password" placeholder="Create password" required>
+            
+            <label>Confirm Password:</label>
+            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+        </div>
+    </div>
+
+    <!-- Test Case 4: Complex nesting -->
+    <div class="form-container">
+        <h2>Test Case 4: Complex Multi-level Nesting</h2>
+        <form id="complex-outer" action="/complex" method="post">
+            <label>Outer Form Field:</label>
+            <input type="text" name="outer_field" placeholder="Outer form field">
+            
+            <div class="nested-form">
+                <h3>Level 1 Container</h3>
+                <label>Level 1 Field:</label>
+                <input type="text" name="level1_field" placeholder="Level 1 field">
+                
+                <form id="level2-form" action="/level2" method="post">
+                    <h4>Level 2 Form</h4>
+                    <label>User ID:</label>
+                    <input type="text" name="user_id" placeholder="Enter user ID" required>
+                    
+                    <label>Department:</label>
+                    <input type="text" name="department" placeholder="Enter department" required>
+                    
+                    <div class="form-like">
+                        <h5>Level 3 Contact Info</h5>
+                        <label>Contact Email:</label>
+                        <input type="email" name="contact_email" placeholder="Contact email" required>
+                        
+                        <label>Contact Phone:</label>
+                        <input type="tel" name="contact_phone" placeholder="Contact phone" required>
+                    </div>
+                    
+                    <button type="submit">Submit Level 2</button>
+                </form>
+            </div>
+            
+            <button type="submit">Submit Complex Form</button>
+        </form>
+    </div>
+
+</body>
+</html>

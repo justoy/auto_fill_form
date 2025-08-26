@@ -80,15 +80,73 @@ export class UIManager {
   }
 
   private positionButton(button: HTMLButtonElement, formElement: HTMLElement): void {
-    // Try to position the button above the form for better visibility
-    const rect = formElement.getBoundingClientRect();
+    // First, try to find a submit button within the form
+    const submitButton = this.findSubmitButton(formElement);
 
-    // If form is near the top, put button below; otherwise above
-    if (rect.top < 100) {
-      formElement.parentNode?.insertBefore(button, formElement.nextSibling);
+    if (submitButton) {
+      console.log('Positioning button near submit button:', submitButton);
+      // Position near the submit button
+      const submitParent = submitButton.parentNode;
+      if (submitParent) {
+        // Insert right before the submit button for better proximity
+        submitParent.insertBefore(button, submitButton);
+
+        // Add some spacing between the autofill button and submit button
+        button.style.marginRight = '8px';
+        button.style.marginBottom = '4px';
+        console.log('Button positioned before submit button');
+      } else {
+        console.log('Submit button has no parent, using fallback');
+        // Fallback if submit button has no parent
+        const rect = formElement.getBoundingClientRect();
+        if (rect.top < 100) {
+          formElement.parentNode?.insertBefore(button, formElement.nextSibling);
+        } else {
+          formElement.parentNode?.insertBefore(button, formElement);
+        }
+      }
     } else {
-      formElement.parentNode?.insertBefore(button, formElement);
+      console.log('No submit button found, using fallback positioning');
+      // Fallback to original positioning logic
+      const rect = formElement.getBoundingClientRect();
+
+      // If form is near the top, put button below; otherwise above
+      if (rect.top < 100) {
+        formElement.parentNode?.insertBefore(button, formElement.nextSibling);
+      } else {
+        formElement.parentNode?.insertBefore(button, formElement);
+      }
     }
+  }
+
+  private findSubmitButton(formElement: HTMLElement): HTMLInputElement | HTMLButtonElement | null {
+    // Look for submit buttons by type and value
+    const submitInputs = formElement.querySelectorAll('input[type="submit"], input[value*="submit" i]');
+    if (submitInputs.length > 0) {
+      console.log('Found submit input:', submitInputs[0]);
+      return submitInputs[0] as HTMLInputElement;
+    }
+
+    // Look for button elements with submit type or text
+    const submitButtons = formElement.querySelectorAll('button[type="submit"], button[value*="submit" i]');
+    if (submitButtons.length > 0) {
+      console.log('Found submit button:', submitButtons[0]);
+      return submitButtons[0] as HTMLButtonElement;
+    }
+
+    // Look for any button that might be a submit button (common patterns)
+    const allButtons = formElement.querySelectorAll('button');
+    for (const btn of allButtons) {
+      const text = btn.textContent?.toLowerCase() || '';
+      const value = (btn as HTMLButtonElement).value?.toLowerCase() || '';
+      if (text.includes('submit') || text.includes('send') || value.includes('submit')) {
+        console.log('Found submit-like button:', btn);
+        return btn as HTMLButtonElement;
+      }
+    }
+
+    console.log('No submit button found in form:', formElement);
+    return null;
   }
 
   private async handleButtonClick(button: HTMLButtonElement, onClick: () => Promise<void>): Promise<void> {
