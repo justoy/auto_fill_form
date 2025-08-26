@@ -45,35 +45,70 @@ export class FormFiller {
   }
 
   private sanitizeFormHtml(element: HTMLElement): string {
-    // Clone the element to avoid modifying the original
-    const clone = element.cloneNode(true) as HTMLElement;
+    // Get all input fields that need autofill
+    const inputs = this.getEligibleInputs(element);
 
-    // Remove current values and sensitive attributes
-    const inputs = clone.querySelectorAll('input, textarea, select');
-    inputs.forEach((input: any) => {
-      input.value = '';
-      input.removeAttribute('value');
-      // Keep structural attributes that help LLM understand the field
-      // but remove any user data
+    // Create a simplified representation of each input field
+    const fieldData = inputs.map((input, index) => {
+      const field: any = {
+        index,
+        tagName: input.tagName.toLowerCase(),
+        type: input.type || 'text',
+        name: input.name || '',
+        id: input.id || '',
+        placeholder: input.placeholder || '',
+        'aria-label': input.getAttribute('aria-label') || '',
+        'aria-describedby': input.getAttribute('aria-describedby') || '',
+        class: input.className || '',
+        required: input.hasAttribute('required'),
+        maxlength: input.getAttribute('maxlength') || '',
+        pattern: input.getAttribute('pattern') || ''
+      };
+
+      // Add label text if available
+      const label = this.findLabelForInput(input);
+      if (label) {
+        field.label = label.textContent?.trim() || '';
+      }
+
+      // For select elements, include option values (not text to avoid sensitive data)
+      if (input.tagName.toLowerCase() === 'select') {
+        const selectElement = input as unknown as HTMLSelectElement;
+        field.options = Array.from(selectElement.options).map(option => ({
+          value: option.value,
+          // Don't include text content to avoid potential sensitive data
+        }));
+      }
+
+      // For textarea, include additional attributes
+      if (input.tagName.toLowerCase() === 'textarea') {
+        const textarea = input as unknown as HTMLTextAreaElement;
+        field.rows = textarea.rows || '';
+        field.cols = textarea.cols || '';
+      }
+
+      return field;
     });
 
-    // Remove scripts and event handlers
-    const scripts = clone.querySelectorAll('script');
-    scripts.forEach(script => script.remove());
+    return JSON.stringify(fieldData, null, 2);
+  }
 
-    // Remove style attributes that might contain sensitive info
-    const allElements = clone.querySelectorAll('*');
-    allElements.forEach((el: any) => {
-      // Remove event handlers
-      const attributes = Array.from(el.attributes);
-      attributes.forEach((attr: any) => {
-        if (attr.name.startsWith('on')) {
-          el.removeAttribute(attr.name);
-        }
-      });
-    });
+  private findLabelForInput(input: HTMLInputElement): HTMLLabelElement | null {
+    // Try to find label by 'for' attribute
+    if (input.id) {
+      const label = input.ownerDocument?.querySelector(`label[for="${input.id}"]`) as HTMLLabelElement;
+      if (label) return label;
+    }
 
-    return clone.outerHTML;
+    // Try to find label as parent or sibling
+    let parent = input.parentElement;
+    while (parent) {
+      const label = parent.querySelector('label');
+      if (label) return label as HTMLLabelElement;
+      parent = parent.parentElement;
+    }
+
+    return null;
   }
 
   private async fillForm(formInfo: FormInfo, mapping: FormMapping, profile: UserProfile): Promise<void> {
