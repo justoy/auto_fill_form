@@ -83,7 +83,7 @@ class ContentScript {
     const formElements = document.querySelectorAll('form');
     formElements.forEach((form) => {
       const inputs = this.getEligibleInputs(form);
-      if (inputs.length > 0) {
+      if (inputs.length > 1) {
         forms.push({
           element: form as HTMLElement,
           type: 'form',
@@ -145,7 +145,8 @@ class ContentScript {
 
   private getEligibleInputs(container: Element): HTMLInputElement[] {
     // Only include input types that typically need autofill with personal data
-    const inputSelector = 'input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input:not([type]), textarea';
+    // Explicitly exclude hidden inputs and other non-autofillable types
+    const inputSelector = 'input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input:not([type]):not([type="hidden"]), textarea';
     const inputs = container.querySelectorAll(inputSelector);
 
     return Array.from(inputs).filter((input) => {

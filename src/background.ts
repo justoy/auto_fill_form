@@ -180,7 +180,7 @@ class BackgroundService {
     return {
       provider: 'openai',
       apiKey: '',
-      model: 'gpt-4o'
+      model: 'gpt-5-mini'
     };
   }
 }

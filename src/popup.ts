@@ -5,7 +5,7 @@ class PopupManager {
   private llmConfig: LLMConfig = {
     provider: 'openai',
     apiKey: '',
-    model: 'gpt-4o'
+    model: 'gpt-5-mini'
   };
 
   constructor() {
@@ -74,7 +74,7 @@ class PopupManager {
     }
 
     if (modelSelect) {
-      modelSelect.value = this.llmConfig.model || 'gpt-4o';
+      modelSelect.value = this.llmConfig.model || 'gpt-5-mini';
     }
   }
 

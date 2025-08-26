@@ -40,7 +40,7 @@ A Chrome extension that uses Large Language Models to automatically fill web for
 1. **Configure OpenAI API:**
    - Click the extension icon in Chrome toolbar
    - Enter your OpenAI API key
-   - Select your preferred model (GPT-4o recommended)
+   - Select your preferred model
    - Click "Save LLM Configuration"
 
 2. **Set up your profile:**
@@ -89,13 +89,6 @@ src/
 └── llm/
     └── openai.ts     # OpenAI API integration
 ```
-
-## Configuration
-
-The extension supports the following OpenAI models:
-- GPT-4o (recommended)
-- GPT-4
-- GPT-3.5 Turbo
 
 ## Troubleshooting
 

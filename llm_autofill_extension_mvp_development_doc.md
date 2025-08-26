@@ -21,7 +21,7 @@ Example Use Case:
 * **Single local profile** only (e.g., `passport_num`, `first_name`, `last_name`, address fields).
 * **Form-only + form-like blocks**: operate on elements inside <form> and on obvious form-like containers (e.g., a <div> grouping multiple inputs) outside <form>.
 * **Manual trigger**: we inject an **“Auto Fill with LLM”** button alongside each detected form; user clicks to run.
-* **User Provide LLM API Key**: User sets up LLM API key and select model, e,g., open ai gpt-4o
+* **User Provide LLM API Key**: User sets up LLM API key and select model, e,g., open ai gpt-5-mini
 * **LLM input**: send the **form’s HTML** (structure only) to the LLM; no extra heuristics, no nearby-text scanning.
 * **LLM output**: mapping from form fields → profile keys.
 
