@@ -31,97 +31,113 @@ export class FormDetector {
 
   public detectForms(): FormInfo[] {
     const forms: FormInfo[] = [];
-    const processedElements = new Set<Element>();
+    const processedInputs = new Set<HTMLInputElement>();
 
-    // Use DFS to detect forms and form-like containers at each level
-    this.dfsDetectForms(document.body, forms, processedElements);
+    // Use DFS to collect inputs and create forms bottom-up
+    this.dfsDetectForms(document.body, forms, processedInputs);
 
     return forms;
   }
 
-  private dfsDetectForms(element: Element, forms: FormInfo[], processedElements: Set<Element>): void {
-    // Skip if already processed
-    if (processedElements.has(element)) return;
-
-    // 1. Check if this is a form element
-    if (element.tagName === 'FORM') {
-      const inputs = this.getDirectInputs(element);
-      if (inputs.length > 1) {
-        forms.push({
-          element: element as HTMLElement,
-          type: 'form',
-          inputs
-        });
-        processedElements.add(element);
-        inputs.forEach(input => processedElements.add(input));
-      }
-    }
-    // 2. Check if this is a form-like container
-    else if (this.isFormLikeContainer(element)) {
-      const inputs = this.getDirectInputs(element);
-      if (inputs.length >= 2 && this.hasFormLikeInputs(inputs)) {
-        forms.push({
-          element: element as HTMLElement,
-          type: 'container',
-          inputs
-        });
-        processedElements.add(element);
-        inputs.forEach(input => processedElements.add(input));
-        (element as HTMLElement).setAttribute('data-llm-autofill-processed', 'true');
-      }
+  private dfsDetectForms(element: Element, forms: FormInfo[], processedInputs: Set<HTMLInputElement>): HTMLInputElement[] {
+    // Base case: if this is an eligible input, return it
+    if (this.isEligibleInput(element)) {
+      const input = element as HTMLInputElement;
+      return processedInputs.has(input) ? [] : [input];
     }
 
-    // 3. Recursively process children (DFS)
+    // Skip navigation containers entirely
+    if (this.isNavigationContainer(element)) {
+      return [];
+    }
+
+    // Collect inputs from all children
+    const childInputs: HTMLInputElement[] = [];
     for (let i = 0; i < element.children.length; i++) {
-      this.dfsDetectForms(element.children[i], forms, processedElements);
+      const inputs = this.dfsDetectForms(element.children[i], forms, processedInputs);
+      childInputs.push(...inputs);
     }
+
+    // If we have fewer than 2 inputs, just return them (don't create a form)
+    if (childInputs.length < 2) {
+      return childInputs;
+    }
+
+    // If we have 2+ inputs and this is a form-like container, create a form
+    if (this.shouldCreateForm(element, childInputs)) {
+      forms.push({
+        element: element as HTMLElement,
+        type: element instanceof HTMLFormElement ? 'form' : 'container',
+        inputs: childInputs
+      });
+
+      // Mark these inputs as processed so they won't be included in parent forms
+      childInputs.forEach(input => processedInputs.add(input));
+      (element as HTMLElement).setAttribute('data-llm-autofill-processed', 'true');
+
+      // Return empty array since we've "consumed" these inputs
+      return [];
+    }
+
+    // Otherwise, return the inputs for potential parent forms
+    return childInputs;
   }
 
-  private isFormLikeContainer(element: Element): boolean {
-    // Skip navigation/filter containers
-    if (this.isNavigationContainer(element)) return false;
+  private isEligibleInput(element: Element): boolean {
+    // Check if it's an input or textarea element using instanceof
+    if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLTextAreaElement)) {
+      return false;
+    }
 
-    // Only consider these container types
-    const containerTags = ['DIV', 'SECTION', 'FIELDSET', 'MAIN', 'ARTICLE'];
-    return containerTags.includes(element.tagName);
+    // Handle textarea elements
+    if (element instanceof HTMLTextAreaElement) {
+      return !element.hidden && !element.disabled;
+    }
+
+    // Handle input elements
+    const input = element as HTMLInputElement;
+
+    // Include common autofillable input types
+    const allowedTypes = ['text', 'email', 'tel', 'password', 'number', 'url', 'date'];
+    const inputType = input.type || 'text';
+
+    if (!allowedTypes.includes(inputType)) {
+      return false;
+    }
+
+    // Skip hidden, disabled, or non-autofillable inputs
+    return !input.hidden &&
+           !input.disabled &&
+           input.type !== 'hidden' &&
+           input.type !== 'submit' &&
+           input.type !== 'button' &&
+           input.type !== 'radio' &&
+           input.type !== 'checkbox';
+  }
+
+  private shouldCreateForm(element: Element, inputs: HTMLInputElement[]): boolean {
+    // Always create forms for <form> elements
+    if (element instanceof HTMLFormElement) {
+      return true;
+    }
+
+    // For other containers, check if it's a valid container type using instanceof
+    if (element instanceof HTMLDivElement) {
+      // Check if inputs look like actual form fields (not just filters/search)
+      return this.hasFormLikeInputs(inputs);
+    }
+
+    return false;
   }
 
   public getEligibleInputs(container: Element): HTMLInputElement[] {
-    // Only include input types that typically need autofill with personal data
-    // Explicitly exclude hidden inputs and other non-autofillable types
-    const inputSelector = 'input[type="text"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], input:not([type]):not([type="hidden"]), textarea';
+    // Get all potential input elements
+    const inputSelector = 'input, textarea';
     const inputs = container.querySelectorAll(inputSelector);
 
     return Array.from(inputs).filter((input) => {
-      const htmlInput = input as HTMLInputElement;
-      // Skip hidden, disabled, or non-autofillable inputs
-      return !htmlInput.hidden &&
-             !htmlInput.disabled &&
-             htmlInput.type !== 'hidden' &&
-             htmlInput.type !== 'submit' &&
-             htmlInput.type !== 'button' &&
-             htmlInput.type !== 'radio' &&
-             htmlInput.type !== 'checkbox';
+      return this.isEligibleInput(input);
     }) as HTMLInputElement[];
-  }
-
-  // Get only direct inputs, excluding those in nested forms/containers
-  private getDirectInputs(container: Element): HTMLInputElement[] {
-    const allInputs = this.getEligibleInputs(container);
-    const nestedInputs = new Set<HTMLInputElement>();
-
-    // Find all nested forms and containers that could have inputs
-    const nestedSelectors = ['form', 'div', 'section', 'fieldset', 'main', 'article'];
-    nestedSelectors.forEach(selector => {
-      const nestedElements = container.querySelectorAll(`:scope > ${selector}`);
-      nestedElements.forEach(nestedElement => {
-        const inputs = this.getEligibleInputs(nestedElement);
-        inputs.forEach(input => nestedInputs.add(input));
-      });
-    });
-
-    // Return only inputs that are direct children, not in nested elements
-    return allInputs.filter(input => !nestedInputs.has(input));
   }
 
   private isNavigationContainer(container: Element): boolean {

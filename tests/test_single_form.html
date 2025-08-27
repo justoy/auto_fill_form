@@ -1,0 +1,117 @@
+<div id="pageContent">
+    <div class="breadcrumbs">
+<span class="previous">
+<a href="/apply/">1. Country/Region</a>
+</span>
+<span class="previous">
+<a href="/arrivaldate/">2. Date of Arrival</a>
+</span>
+<span class="previous">
+<a href="/prerequisites/">3. Prerequisites</a>
+</span>
+<span class="current">4. Personal Information</span>
+</div>
+    <div id="form" class="form_area">
+        <div id="exempt" class="form_row dn">
+            <span class="feedback_header"><i class="info"></i>You are exempt from visa.</span>
+            <span class="feedback_info"></span>
+        </div>
+        
+        <div id="body_pnlInputs">
+
+            <div class="form_row">
+                <span class="label">Given/First Name(s)</span>
+                <span class="item">
+                    <input name="ctl00$body$txtAd" type="text" maxlength="50" id="txtAd" rel="Type your name in the box as shown in your passport. If you have a middle/second name, type all the names right after your first name with a space in between. Only dash (-), dot (.), apostrophe (') and comma (,) special characters are allowed." required="">
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Surname(s)</span>
+                <span class="item">
+                    <input name="ctl00$body$txtSoyad" type="text" maxlength="50" id="txtSoyad" rel="Please enter your last name, as in your passport. Only dash (-), dot (.), apostrophe (') and comma (,) special characters are allowed. If your surname is not specified on your travel document, you can leave it blank.">
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Date of Birth</span>
+                <span class="item">
+                    <span class="k-widget k-datepicker k-header" style="width: 150px;"><span class="k-picker-wrap k-state-default"><input name="ctl00$body$txtDogumTarihi" type="text" maxlength="10" onchange="javascript:setTimeout('__doPostBack(\'ctl00$body$txtDogumTarihi\',\'\')', 0)" onkeypress="if (WebForm_TextBoxKeyHandler(event) == false) return false;" id="txtDogumTarihi" rel="Enter your date of birth in the dd.mm.yyyy format, as in your passport." required="" style="width: 100%;" data-role="datepicker" class="k-input" role="textbox" aria-haspopup="true" aria-expanded="false" aria-owns="txtDogumTarihi_dateview" aria-disabled="false" aria-readonly="false" aria-label="Current focused date is null"><span unselectable="on" class="k-select" role="button" aria-controls="txtDogumTarihi_dateview"><span unselectable="on" class="k-icon k-i-calendar">select</span></span></span></span>&nbsp;&nbsp;<span id="spnDogumTarihi"></span>
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Place of Birth</span>
+                <span class="item">
+                    <input name="ctl00$body$txtDogumYeri" type="text" maxlength="40" id="txtDogumYeri" rel="Enter your place of birth, as in your passport. Only dash (-), dot (.), apostrophe (') and comma (,) special characters are allowed." required="">
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Mother's Name</span>
+                <span class="item">
+                    <input name="ctl00$body$txtAnneAd" type="text" maxlength="40" id="txtAnneAd" rel="Type your mother’s name (optional). If she has a middle/second name, type all the names right after her first name with a space in between. Only dash (-), dot (.), apostrophe (') and comma (,) special characters are allowed.">
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Father's Name</span>
+                <span class="item">
+                    <input name="ctl00$body$txtBabaAd" type="text" maxlength="40" id="txtBabaAd" rel="Type your father’s name (optional). If he has a middle/second name, type all the names right after his first name with a space in between. Only dash (-), dot (.), apostrophe (') and comma (,) special characters are allowed.">
+                </span>
+            </div>
+            <div class="form_row">
+                <span id="body_lblTravelDocument" class="label">Passport Number</span>
+                <span class="item">
+                    <input name="ctl00$body$txtPasaportNo" type="text" maxlength="16" id="txtPasaportNo" rel="Please type your travel document number as it appears on your travel document. Special characters and white space are not allowed." required="">
+                </span>
+            </div>
+            <div class="form_row">
+                <span id="body_lblPasaportVerTarih" class="label">Passport Issue Date</span>
+                <span class="item">
+                    <span class="k-widget k-datepicker k-header" style="width: 150px;"><span class="k-picker-wrap k-state-default"><input name="ctl00$body$txtPasaportVerTarih" type="text" maxlength="10" id="txtPasaportVerTarih" rel="Please enter the date of issue of your travel document in the dd.mm.yyyy format." required="" style="width: 100%;" data-role="datepicker" class="k-input" role="textbox" aria-haspopup="true" aria-expanded="false" aria-owns="txtPasaportVerTarih_dateview" aria-disabled="false" aria-readonly="false" aria-label="Current focused date is null"><span unselectable="on" class="k-select" role="button" aria-controls="txtPasaportVerTarih_dateview"><span unselectable="on" class="k-icon k-i-calendar">select</span></span></span></span>&nbsp;&nbsp;<span id="spnPasaportVerTarih"></span>
+                </span>
+            </div>
+            <div class="form_row">
+                <span id="body_lblPasaportGecTarih" class="label">Passport Expiry Date</span>
+                <span class="item">
+                    <span class="k-widget k-datepicker k-header" style="width: 150px;"><span class="k-picker-wrap k-state-default"><input name="ctl00$body$txtPasaportGecTarih" type="text" maxlength="10" id="txtPasaportGecTarih" rel="Please enter the expiry date of your travel document in the dd.mm.yyyy format." required="" style="width: 100%;" data-role="datepicker" class="k-input" role="textbox" aria-haspopup="true" aria-expanded="false" aria-owns="txtPasaportGecTarih_dateview" aria-disabled="false" aria-readonly="false" aria-label="Current focused date is null"><span unselectable="on" class="k-select" role="button" aria-controls="txtPasaportGecTarih_dateview"><span unselectable="on" class="k-icon k-i-calendar">select</span></span></span></span>&nbsp;&nbsp;<span id="spnPasaportGecTarih"></span>
+                </span>
+            </div>
+            <div id="body_pnlEkVize">
+
+                <div class="form_row">
+                    <span class="label">Type of Supporting Doc.</span>
+                    <span class="item">
+                        <span class="k-widget k-dropdown k-header" unselectable="on" role="listbox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-owns="cmbEkVizeTuru_listbox" aria-disabled="false" aria-readonly="false" aria-busy="false" aria-activedescendant="cmbEkVizeTuru_option_selected" style="width: 250px;"><span unselectable="on" class="k-dropdown-wrap k-state-default"><span unselectable="on" class="k-input">Not Present</span><span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-arrow-s">select</span></span></span><select name="ctl00$body$cmbEkVizeTuru" onchange="javascript:setTimeout('__doPostBack(\'ctl00$body$cmbEkVizeTuru\',\'\')', 0)" id="cmbEkVizeTuru" style="width: 250px; display: none;" data-role="dropdownlist"><option value="0">Not Present</option><option value="1">Visa</option><option value="2">Residence Permit</option></select></span>
+                    </span>
+                </div>
+                
+            
+</div>
+            
+            <div class="form_row">
+                <span class="label">E-mail address</span>
+                <span class="item">
+                    <input name="ctl00$body$txtEmail" type="email" maxlength="40" id="txtEmail" rel="Type your email address." required="">
+                </span>
+            </div>
+            <div class="form_row">
+                <span class="label">Phone Number</span>
+                <span class="item">
+                    <input name="ctl00$body$txtTel" type="tel" maxlength="20" id="txtTel" rel="Please enter your phone number. Only parenthesis, plus and number special characters are allowed." required="">
+                </span>
+            </div>
+            <div class="form_row">
+                <span style="line-height: 20px" class="label"> Address</span>
+                <span class="item">
+                    <textarea name="ctl00$body$txtadres" rows="2" cols="20" id="txtadres" rel="Enter your address at destination. Only dot (.), comma (,), colon (:), semi colon (;), slash (/), back slash (\), underscore (_), numbers special characters are allowed." required=""></textarea>
+                </span>
+            </div>
+            <div class="form_row">
+                <div class="checkbox" id="onamcheck"><i></i><a>I have read and accept the provisions of the Türkiye Entry Commitment and Information Form.</a></div>
+            </div>
+        
+</div>
+    </div>
+    <div class="form_submit">
+        <input type="submit" name="ctl00$body$btnAddNew" value="Add a New Person" id="btnAddNew" class="btn_blue btn_addperson">
+        <input type="submit" name="ctl00$body$btnSubmit" value="Save and Continue" id="btnSubmit" style="display: none;">
+    </div>
+
+</div>

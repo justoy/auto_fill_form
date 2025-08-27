@@ -26,6 +26,7 @@ export class UIManager {
     const button = this.createButton();
     const buttonId = `${UIManager.BUTTON_ID_PREFIX}${this.formCounter++}`;
     button.id = buttonId;
+    console.log('formInfo', formInfo);
 
     // Add click handler first
     button.addEventListener('click', async () => {

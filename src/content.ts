@@ -52,6 +52,7 @@ class ContentScript {
     console.log('Forms detected:', forms);
     forms.forEach((formInfo) => {
       if (!this.uiManager.hasExistingButton(formInfo.element)) {
+        // only inject button for leaf nodes that don't have a injected button already
         this.uiManager.injectButton(formInfo, () => this.formFiller.handleAutofill(formInfo));
       }
     });
