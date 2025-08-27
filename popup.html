@@ -98,6 +98,64 @@
       background: #1976D2;
     }
 
+    .button-danger {
+      background: #f44336;
+    }
+
+    .button-danger:hover {
+      background: #d32f2f;
+    }
+
+    .profile-management {
+      margin-bottom: 16px;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .profile-actions button {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .category {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .category-title {
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+
+    .category-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .category-actions button {
+      padding: 4px 8px;
+      font-size: 11px;
+      width: auto;
+    }
+
     .profile-field {
       display: flex;
       gap: 8px;
@@ -106,6 +164,18 @@
     }
 
     .profile-field input {
+      flex: 1;
+    }
+
+    .field-label {
+      flex: 0 0 120px;
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    .field-input {
       flex: 1;
     }
 
@@ -119,6 +189,18 @@
 
     .remove-btn:hover {
       background: #d32f2f;
+    }
+
+    .add-field-btn {
+      background: #2196F3;
+      padding: 4px 8px;
+      font-size: 11px;
+      width: auto;
+      margin: 0;
+    }
+
+    .add-field-btn:hover {
+      background: #1976D2;
     }
 
     .status {
@@ -182,14 +264,32 @@
     </div>
 
     <div class="section">
-      <h2>Profile Information</h2>
-      <div id="profileFields"></div>
-      
-      <div class="add-field-container">
-        <input type="text" id="newFieldKey" placeholder="Field name (e.g., middle_name)">
-        <button id="addField" class="button-secondary">Add Field</button>
+      <h2>Profile Management</h2>
+      <div class="profile-management">
+        <div class="form-group">
+          <label for="profileSelect">Active Profile:</label>
+          <select id="profileSelect">
+            <option value="">Select Profile...</option>
+          </select>
+        </div>
+
+        <div class="profile-actions">
+          <button id="createProfile" class="button-secondary">Create Profile</button>
+          <button id="renameProfile" class="button-secondary">Rename</button>
+          <button id="deleteProfile" class="button-danger">Delete</button>
+        </div>
       </div>
-      
+    </div>
+
+    <div class="section">
+      <h2>Profile Information</h2>
+      <div id="profileCategories"></div>
+
+      <div class="add-category-container">
+        <input type="text" id="newCategoryName" placeholder="New category name">
+        <button id="addCategory" class="button-secondary">Add Category</button>
+      </div>
+
       <button id="saveProfile">Save Profile</button>
     </div>
 

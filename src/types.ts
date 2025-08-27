@@ -1,5 +1,21 @@
+export interface ProfileField {
+  key: string;
+  value: string;
+  label?: string;
+}
+
+export interface ProfileCategory {
+  id: string;
+  name: string;
+  fields: ProfileField[];
+}
+
 export interface UserProfile {
-  [key: string]: string;
+  id: string;
+  name: string;
+  categories: ProfileCategory[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface LLMConfig {
@@ -28,6 +44,12 @@ export interface FormInfo {
 }
 
 export interface StorageData {
-  profile: UserProfile;
+  profiles: UserProfile[];
+  activeProfileId: string | null;
   llmConfig: LLMConfig;
+}
+
+// For backward compatibility with existing code
+export interface LegacyUserProfile {
+  [key: string]: string;
 }

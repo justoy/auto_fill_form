@@ -113,7 +113,7 @@ export class FormFiller {
 
   private async fillForm(formInfo: FormInfo, mapping: FormMapping, profile: UserProfile): Promise<void> {
     for (const [selector, profileKey] of Object.entries(mapping)) {
-      const value = profile[profileKey];
+      const value = this.getProfileValue(profile, profileKey);
       if (!value) continue;
 
       const input = this.findInputBySelector(formInfo.element, selector);
@@ -121,6 +121,23 @@ export class FormFiller {
         await this.fillInput(input, value);
       }
     }
+  }
+
+  private getProfileValue(profile: UserProfile, profileKey: string): string {
+    // Check if profile has the new categorized structure
+    if (profile.categories && Array.isArray(profile.categories)) {
+      // Search through all categories for the field
+      for (const category of profile.categories) {
+        const field = category.fields.find(f => f.key === profileKey);
+        if (field) {
+          return field.value;
+        }
+      }
+      return '';
+    }
+
+    // Fallback for legacy profile structure
+    return (profile as any)[profileKey] || '';
   }
 
   private findInputBySelector(container: HTMLElement, selector: string): HTMLInputElement | null {
