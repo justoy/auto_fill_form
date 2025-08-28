@@ -1,5 +1,6 @@
 import { jsonrepair } from 'jsonrepair';
 import { LLMConfig, LLMRequest, LLMResponse } from '../types';
+import { PromptBuilder } from './prompt-builder';
 
 export class OpenAIService {
   private config: LLMConfig;
@@ -9,7 +10,7 @@ export class OpenAIService {
   }
 
   async getFormMapping(request: LLMRequest): Promise<LLMResponse> {
-    const prompt = this.buildPrompt(request);
+    const prompt = PromptBuilder.buildFormMappingPrompt(request);
     
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -19,7 +20,7 @@ export class OpenAIService {
           'Authorization': `Bearer ${this.config.apiKey}`
         },
         body: JSON.stringify({
-          model: this.config.model,
+          model: 'gpt-5-nano',
           messages: [
             {
               role: 'system',
@@ -58,32 +59,5 @@ export class OpenAIService {
       console.error('OpenAI API call failed:', error);
       throw error;
     }
-  }
-
-  private buildPrompt(request: LLMRequest): string {
-    return `Analyze these form input fields and map them to profile keys.
-
-Available profile keys: ${request.profileKeys.join(', ')}
-
-Form Fields (JSON):
-${request.formHtml}
-
-Instructions:
-1. Each field has an 'index' number, use this if no id or name is available
-2. Map form input fields to the most appropriate profile key based on field attributes (name, id, placeholder, label, aria-label, etc.)
-3. Use field identifiers in this priority: id > name > index
-4. Return ONLY a raw JSON object - no markdown, no code blocks, no explanation
-5. Format: {"id:fieldId": "profile_key"} or {"name:fieldName": "profile_key"} or {"index:0": "profile_key"}
-6. Skip fields that don't match any profile key
-
-Example output:
-{
-  "id:passport_number": "passport_num",
-  "name:firstName": "first_name",
-  "name:email": "email",
-  "index:2": "phone"
-}
-
-Return the JSON mapping now:`;
   }
 }

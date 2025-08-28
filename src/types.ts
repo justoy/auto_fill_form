@@ -21,7 +21,6 @@ export interface UserProfile {
 export interface LLMConfig {
   provider: 'openai';
   apiKey: string;
-  model: string;
 }
 
 export interface FormMapping {

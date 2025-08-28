@@ -386,8 +386,7 @@ class BackgroundService {
   private getDefaultLLMConfig(): LLMConfig {
     return {
       provider: 'openai',
-      apiKey: '',
-      model: 'gpt-5-mini'
+      apiKey: ''
     };
   }
 

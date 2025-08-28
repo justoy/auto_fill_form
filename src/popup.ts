@@ -5,8 +5,7 @@ class PopupManager {
   private activeProfile: UserProfile | null = null;
   private llmConfig: LLMConfig = {
     provider: 'openai',
-    apiKey: '',
-    model: 'gpt-5-mini'
+    apiKey: ''
   };
   private enabled: boolean = true;
 
@@ -119,14 +118,9 @@ class PopupManager {
 
   private renderLLMConfig() {
     const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
-    const modelSelect = document.getElementById('model') as HTMLSelectElement;
 
     if (apiKeyInput) {
       apiKeyInput.value = this.llmConfig.apiKey || '';
-    }
-
-    if (modelSelect) {
-      modelSelect.value = this.llmConfig.model || 'gpt-5-mini';
     }
   }
 
@@ -484,9 +478,8 @@ class PopupManager {
 
   private async saveLLMConfig() {
     const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
-    const modelSelect = document.getElementById('model') as HTMLSelectElement;
 
-    if (!apiKeyInput || !modelSelect) return;
+    if (!apiKeyInput) return;
 
     const apiKey = apiKeyInput.value.trim();
     if (!apiKey) {
@@ -496,8 +489,7 @@ class PopupManager {
 
     this.llmConfig = {
       provider: 'openai',
-      apiKey,
-      model: modelSelect.value
+      apiKey
     };
 
     try {

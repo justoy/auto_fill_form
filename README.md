@@ -1,9 +1,11 @@
 # LLM Autofill Extension
 
-A powerful Chrome extension that uses Large Language Models to automatically fill web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection for enhanced productivity.
+A powerful Chrome extension that uses Large Language Models to automatically detect and suggest completions for web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection with tab-key confirmation for enhanced productivity.
 
 ## What's New 🚀
 
+- **⚡ Auto-Fill with Tab Confirmation**: Forms are automatically detected and filled with suggestions - press Tab to accept
+- **🎛️ Enable/Disable Toggle**: Easy toggle in the popup to turn auto-fill on/off
 - **📂 Profile Categories**: Organize your data into logical groups (Personal, Address, Passport, etc.)
 - **👥 Multiple Profiles**: Create separate profiles for work, personal, travel, and more
 - **🎛️ Simplified Field Management**: Just enter field names - keys are auto-generated
@@ -12,10 +14,11 @@ A powerful Chrome extension that uses Large Language Models to automatically fil
 
 ## Features
 
-- 🤖 **LLM-Powered Field Mapping**: Uses OpenAI's GPT models to understand form fields
+- 🤖 **LLM-Powered Field Mapping**: Uses LLM models to understand form fields
 - 🔒 **Privacy-First**: All personal data stays local, only form structure is sent to LLM
-- 📝 **Form Detection**: Automatically detects both `<form>` elements and form-like containers
-- ⚡ **One-Click Filling**: Simple button injection for easy form completion
+- 📝 **Automatic Form Detection**: Automatically detects both `<form>` elements and form-like containers
+- ⚡ **Auto-Fill with Tab Confirmation**: Forms are filled with suggestions automatically - press Tab to accept
+- 🎛️ **Enable/Disable Toggle**: Easy toggle to turn auto-fill on/off as needed
 - 📂 **Organized Profile Categories**: Fields grouped into logical categories (Personal, Address, Passport, etc.)
 - 👥 **Multiple Profile Management**: Create and switch between different profiles for various use cases
 - 🎛️ **Easy Field Management**: Add custom fields with simple name entry - field keys auto-generated
@@ -54,7 +57,11 @@ A powerful Chrome extension that uses Large Language Models to automatically fil
    - Select your preferred model
    - Click "Save LLM Configuration"
 
-2. **Set up your profile:**
+2. **Enable Auto-Fill:**
+   - Check the "Enable Auto-Fill" toggle in the General Settings section
+   - The extension will automatically detect and suggest completions for forms
+
+3. **Set up your profile:**
    - **Create a Profile**: Click "Create Profile" and give it a name (e.g., "Work", "Personal", "Travel")
    - **Organize Your Data**: Your profile comes with pre-organized categories:
      - **Personal Information**: Name, email, phone
@@ -68,17 +75,25 @@ A powerful Chrome extension that uses Large Language Models to automatically fil
 ## Usage
 
 1. **Navigate to any web page with forms**
-2. **Look for the "🤖 Auto Fill with LLM" button** that appears near forms
-3. **Click the button** to automatically fill the form with your profile data
-4. **Review and submit** the form as needed
+2. **Auto-fill suggestions appear automatically** in form fields as gray placeholder text
+3. **Press Tab to accept** a suggestion and move to the next field
+4. **Continue pressing Tab** to accept additional suggestions or type to override them
+5. **Submit the form** when you're satisfied with the filled data
+
+### Enable/Disable Auto-Fill
+
+- **Enable**: Check the "Enable Auto-Fill" toggle in the extension popup
+- **Disable**: Uncheck the toggle to stop automatic form detection
+- **Quick Toggle**: Access the extension popup by clicking the extension icon in your browser toolbar
 
 ## How It Works
 
-1. **Form Detection**: The extension scans pages for `<form>` elements and form-like containers with multiple input fields
-2. **Button Injection**: A "Auto Fill with LLM" button is added near each detected form
-3. **LLM Analysis**: When clicked, the form's HTML structure (without values) is sent to OpenAI
-4. **Field Mapping**: The LLM returns a mapping of form fields to your active profile's field keys
-5. **Smart Filling**: The extension searches through your profile categories to find matching data and fills the form fields
+1. **Automatic Form Detection**: The extension continuously scans pages for `<form>` elements and form-like containers with multiple input fields
+2. **LLM Analysis**: When a form is detected, its HTML structure (without values) is sent to OpenAI for analysis
+3. **Field Mapping**: The LLM returns a mapping of form fields to your active profile's field keys
+4. **Suggestion Display**: Matching profile data appears as gray placeholder text in form fields
+5. **Tab Confirmation**: Press **Tab** to accept a suggestion, which fills the field and moves focus to the next input
+6. **Smart Navigation**: The system automatically moves focus to the next relevant field after each acceptance
 
 ## Profile Management
 
@@ -110,16 +125,11 @@ The extension supports multiple profiles with organized categories for better da
 
 - ✅ **Personal data never leaves your device** - only stored in Chrome's local storage
 - ✅ **Only form structure sent to LLM** - no personal values or user-entered data
-- ✅ **Manual trigger only** - forms are filled only when you click the button
-- ✅ **No background processing** - extension only activates when you use it
+- ✅ **Enable/Disable control** - you have full control over when auto-fill is active
+- ✅ **Tab confirmation required** - suggestions are shown but require explicit Tab confirmation to fill
+- ✅ **Automatic processing** - only when enabled and forms are detected on pages you visit
 
 ## Development
-
-### Available Scripts
-
-- `npm run build` - Build for production
-- `npm run dev` - Build and watch for changes
-- `npm run type-check` - TypeScript type checking
 
 ### Project Structure
 
@@ -133,28 +143,6 @@ src/
 └── llm/
     └── openai.ts     # OpenAI API integration
 ```
-
-## Troubleshooting
-
-### General Issues
-- **Button not appearing**: Refresh the page after installing/updating the extension
-- **Filling not working**: Check that your OpenAI API key is valid and you have credits
-- **Console errors**: Check browser console for detailed error messages
-
-### Profile Management Issues
-- **Profile not saving**: Ensure you've clicked "Save Profile" after making changes
-- **Fields not appearing in forms**: Check that field keys match what the LLM expects (field names are auto-converted to keys like "first_name", "email_address")
-- **Multiple profiles not working**: Make sure you've selected the correct profile from the dropdown before filling forms
-- **Can't delete profile**: You can't delete the only remaining profile - create a new one first
-
-### Form Filling Issues
-- **Form not filling completely**: The LLM may not recognize all field types - try adding custom field mappings in your profile
-- **Wrong data in fields**: Check that your profile categories contain the correct information for the form type
-- **Form structure changed**: Some dynamic forms may need page refresh to be detected properly
-
-## Extending to Other LLM Providers
-
-To add support for other LLM providers, create a new service file in `src/llm/` following the pattern of `openai.ts`.
 
 ## License
 
