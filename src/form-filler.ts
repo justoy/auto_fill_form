@@ -17,7 +17,27 @@ export class FormFiller {
     });
   }
 
+  // Track inputs with autocomplete suggestions
+  private autocompleteInputs = new WeakMap<HTMLInputElement, { originalPlaceholder: string; suggestion: string; profileKey: string }>();
+
+  // CSS for autocomplete styling
+  private autocompleteStyles = `
+    .form-autocomplete-suggestion {
+      color: #9CA3AF !important;
+      font-style: italic !important;
+      opacity: 0.7 !important;
+    }
+    .form-autocomplete-suggestion::placeholder {
+      color: #9CA3AF !important;
+      font-style: italic !important;
+      opacity: 0.7 !important;
+    }
+  `;
+
   public async handleAutofill(formInfo: FormInfo): Promise<void> {
+    // Inject autocomplete styles
+    this.injectAutocompleteStyles();
+
     // Get sanitized form HTML
     const formHtml = this.sanitizeFormHtml(formInfo.element);
 
@@ -40,8 +60,17 @@ export class FormFiller {
       throw new Error(profileResponse.error);
     }
 
-    // Fill the form
-    await this.fillForm(formInfo, response.mapping, profileResponse.profile);
+    // Show autocomplete suggestions
+    await this.showAutocompleteSuggestions(formInfo, response.mapping, profileResponse.profile);
+  }
+
+  private injectAutocompleteStyles(): void {
+    if (!document.querySelector('#form-autocomplete-styles')) {
+      const style = document.createElement('style');
+      style.id = 'form-autocomplete-styles';
+      style.textContent = this.autocompleteStyles;
+      document.head.appendChild(style);
+    }
   }
 
   private sanitizeFormHtml(element: HTMLElement): string {
@@ -111,14 +140,97 @@ export class FormFiller {
     return null;
   }
 
-  private async fillForm(formInfo: FormInfo, mapping: FormMapping, profile: UserProfile): Promise<void> {
+  private async showAutocompleteSuggestions(formInfo: FormInfo, mapping: FormMapping, profile: UserProfile): Promise<void> {
     for (const [selector, profileKey] of Object.entries(mapping)) {
       const value = this.getProfileValue(profile, profileKey);
       if (!value) continue;
 
       const input = this.findInputBySelector(formInfo.element, selector);
       if (input) {
-        await this.fillInput(input, value);
+        await this.showAutocompleteSuggestion(input, value, profileKey);
+      }
+    }
+  }
+
+  private async showAutocompleteSuggestion(input: HTMLInputElement, suggestion: string, profileKey: string): Promise<void> {
+    // Store original placeholder
+    const originalPlaceholder = input.placeholder || '';
+
+    // Store autocomplete info
+    this.autocompleteInputs.set(input, {
+      originalPlaceholder,
+      suggestion,
+      profileKey
+    });
+
+    // Set the suggestion as placeholder text with special styling
+    input.placeholder = suggestion;
+    input.classList.add('form-autocomplete-suggestion');
+
+    // Add Tab key listener for confirmation
+    this.addTabConfirmationListener(input);
+  }
+
+  private addTabConfirmationListener(input: HTMLInputElement): void {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && !event.shiftKey) {
+        event.preventDefault();
+        this.confirmAutocompleteSuggestion(input);
+      }
+    };
+
+    // Store the listener so we can remove it later
+    (input as any)._autocompleteListener = handleKeyDown;
+    input.addEventListener('keydown', handleKeyDown);
+  }
+
+  private confirmAutocompleteSuggestion(input: HTMLInputElement): void {
+    const autocompleteInfo = this.autocompleteInputs.get(input);
+    if (!autocompleteInfo) return;
+
+    // Set the actual value
+    input.value = autocompleteInfo.suggestion;
+
+    // Restore original placeholder
+    input.placeholder = autocompleteInfo.originalPlaceholder;
+    input.classList.remove('form-autocomplete-suggestion');
+
+    // Remove the listener
+    const listener = (input as any)._autocompleteListener;
+    if (listener) {
+      input.removeEventListener('keydown', listener);
+      delete (input as any)._autocompleteListener;
+    }
+
+    // Remove from tracking
+    this.autocompleteInputs.delete(input);
+
+    // Dispatch events to notify the page
+    const events = [
+      new Event('input', { bubbles: true }),
+      new Event('change', { bubbles: true }),
+      new Event('blur', { bubbles: true })
+    ];
+
+    events.forEach(event => {
+      input.dispatchEvent(event);
+    });
+
+    // Move focus to next input if available
+    this.focusNextInput(input);
+  }
+
+  private focusNextInput(currentInput: HTMLInputElement): void {
+    const form = currentInput.form;
+    if (!form) return;
+
+    const inputs = Array.from(form.querySelectorAll('input, textarea, select'));
+    const currentIndex = inputs.indexOf(currentInput);
+
+    if (currentIndex >= 0 && currentIndex < inputs.length - 1) {
+      const nextInput = inputs[currentIndex + 1] as HTMLElement;
+      if (nextInput && typeof nextInput.focus === 'function') {
+        nextInput.focus();
       }
     }
   }
