@@ -18,10 +18,8 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
-export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'chrome';
-
 export interface LLMConfig {
-  provider: LLMProvider;
+  provider: string;
   apiKey?: string;
 }
 
