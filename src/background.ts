@@ -6,6 +6,7 @@ class BackgroundService {
 
   constructor() {
     this.setupMessageListener();
+    this.setupActionListener();
     this.initializeLLMService();
   }
 
@@ -16,6 +17,12 @@ class BackgroundService {
         return true; // Keep the message channel open for async response
       }
     );
+  }
+
+  private setupActionListener() {
+    chrome.action.onClicked.addListener(() => {
+      chrome.runtime.openOptionsPage();
+    });
   }
 
   private async initializeLLMService() {
