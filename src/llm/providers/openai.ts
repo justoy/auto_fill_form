@@ -1,8 +1,8 @@
-import { jsonrepair } from 'jsonrepair';
-import { LLMConfig, LLMRequest, LLMResponse } from '../types';
-import { PromptBuilder } from './prompt-builder';
+import { LLMConfig, LLMRequest, LLMResponse, LLMProviderInterface } from '../../types';
+import { PromptBuilder } from '../prompt-builder';
+import { LLMResponseParser } from '../response-parser';
 
-export class OpenAIService {
+export class OpenAIProvider implements LLMProviderInterface {
   private config: LLMConfig;
 
   constructor(config: LLMConfig) {
@@ -11,7 +11,7 @@ export class OpenAIService {
 
   async getFormMapping(request: LLMRequest): Promise<LLMResponse> {
     const prompt = PromptBuilder.buildFormMappingPrompt(request);
-    
+
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -41,20 +41,8 @@ export class OpenAIService {
 
       const data = await response.json();
       const content = data.choices[0]?.message?.content;
-      
-      if (!content) {
-        throw new Error('No response content from OpenAI');
-      }
 
-      // Use jsonrepair to handle malformed JSON (e.g., wrapped in ```json code blocks)
-      try {
-        const repairedJson = jsonrepair(content.trim());
-        const mapping = JSON.parse(repairedJson);
-        return { mapping };
-      } catch (repairError) {
-        console.error('Failed to repair and parse JSON:', content);
-        throw new Error(`Invalid JSON response from OpenAI: ${repairError instanceof Error ? repairError.message : 'Unknown parsing error'}`);
-      }
+      return LLMResponseParser.parseFormMappingResponse(content, 'OpenAI');
     } catch (error) {
       console.error('OpenAI API call failed:', error);
       throw error;

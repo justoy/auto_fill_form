@@ -18,8 +18,10 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+export type LLMProvider = 'openai' | 'anthropic' | 'google';
+
 export interface LLMConfig {
-  provider: 'openai';
+  provider: LLMProvider;
   apiKey: string;
 }
 
@@ -34,6 +36,10 @@ export interface LLMRequest {
 
 export interface LLMResponse {
   mapping: FormMapping;
+}
+
+export interface LLMProviderInterface {
+  getFormMapping(request: LLMRequest): Promise<LLMResponse>;
 }
 
 export interface FormInfo {

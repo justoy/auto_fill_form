@@ -65,6 +65,9 @@ class PopupManager {
     });
 
     // LLM Configuration
+    document.getElementById('providerSelect')?.addEventListener('change', (e) => {
+      this.onProviderSelect((e.target as HTMLSelectElement).value);
+    });
     document.getElementById('saveLLMConfig')?.addEventListener('click', () => {
       this.saveLLMConfig();
     });
@@ -117,11 +120,99 @@ class PopupManager {
   }
 
   private renderLLMConfig() {
-    const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
-
-    if (apiKeyInput) {
-      apiKeyInput.value = this.llmConfig.apiKey || '';
+    // Set the provider selector
+    const providerSelect = document.getElementById('providerSelect') as HTMLSelectElement;
+    if (providerSelect) {
+      providerSelect.value = this.llmConfig.provider;
     }
+
+    // Render dynamic configuration fields
+    this.renderProviderConfig();
+  }
+
+  private renderProviderConfig() {
+    const container = document.getElementById('providerConfig');
+    if (!container) return;
+
+    // Clear existing fields
+    container.innerHTML = '';
+
+    // Create configuration fields based on provider
+    const configFields = this.createProviderConfigFields(this.llmConfig.provider);
+    configFields.forEach(field => {
+      container.appendChild(field);
+    });
+  }
+
+  private createProviderConfigFields(provider: string): HTMLElement[] {
+    const fields: HTMLElement[] = [];
+
+    switch (provider) {
+      case 'openai':
+        fields.push(this.createApiKeyField('OpenAI API Key', 'sk-...', this.llmConfig.apiKey));
+        break;
+      case 'anthropic':
+        fields.push(this.createApiKeyField('Anthropic API Key', 'sk-ant-...', this.llmConfig.apiKey));
+        break;
+      case 'google':
+        fields.push(this.createApiKeyField('Google AI API Key', 'your-google-api-key', this.llmConfig.apiKey));
+        break;
+      default:
+        fields.push(this.createApiKeyField('API Key', 'your-api-key', this.llmConfig.apiKey));
+    }
+
+    return fields;
+  }
+
+  private createTextField(label: string, placeholder: string, value: string): HTMLElement {
+    const formGroup = document.createElement('div');
+    formGroup.className = 'form-group';
+
+    const labelElement = document.createElement('label');
+    labelElement.setAttribute('for', 'apiKey');
+    labelElement.textContent = label;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'apiKey';
+    input.placeholder = placeholder;
+    input.value = value || '';
+
+    formGroup.appendChild(labelElement);
+    formGroup.appendChild(input);
+
+    return formGroup;
+  }
+
+  private createApiKeyField(label: string, placeholder: string, value: string): HTMLElement {
+    const formGroup = document.createElement('div');
+    formGroup.className = 'form-group';
+
+    const labelElement = document.createElement('label');
+    labelElement.setAttribute('for', 'apiKey');
+    labelElement.textContent = label;
+
+    const input = document.createElement('input');
+    input.type = 'password';
+    input.id = 'apiKey';
+    input.placeholder = placeholder;
+    input.value = value || '';
+
+    formGroup.appendChild(labelElement);
+    formGroup.appendChild(input);
+
+    return formGroup;
+  }
+
+  private onProviderSelect(provider: string) {
+    // Update the configuration provider
+    this.llmConfig.provider = provider as any;
+
+    // Clear the API key when switching providers
+    this.llmConfig.apiKey = '';
+
+    // Re-render the configuration fields
+    this.renderProviderConfig();
   }
 
   private renderProfileSelector() {
@@ -478,17 +569,25 @@ class PopupManager {
 
   private async saveLLMConfig() {
     const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
+    const providerSelect = document.getElementById('providerSelect') as HTMLSelectElement;
 
-    if (!apiKeyInput) return;
+    if (!apiKeyInput || !providerSelect) return;
 
     const apiKey = apiKeyInput.value.trim();
+    const provider = providerSelect.value;
+
     if (!apiKey) {
       this.showStatus('Please enter an API key', 'error');
       return;
     }
 
+    if (!provider) {
+      this.showStatus('Please select a provider', 'error');
+      return;
+    }
+
     this.llmConfig = {
-      provider: 'openai',
+      provider: provider as any,
       apiKey
     };
 

@@ -1,8 +1,8 @@
-import { OpenAIService } from './llm/openai';
-import { LLMConfig, LLMRequest, StorageData, UserProfile, ProfileCategory, LegacyUserProfile } from './types';
+import { LLMProviderFactory } from './llm/provider-factory';
+import { LLMConfig, LLMRequest, LLMProviderInterface, StorageData, UserProfile, ProfileCategory, LegacyUserProfile } from './types';
 
 class BackgroundService {
-  private llmService: OpenAIService | null = null;
+  private llmService: LLMProviderInterface | null = null;
 
   constructor() {
     this.setupMessageListener();
@@ -29,7 +29,7 @@ class BackgroundService {
     try {
       const data = await this.getStorageData();
       if (data.llmConfig?.apiKey) {
-        this.llmService = new OpenAIService(data.llmConfig);
+        this.llmService = LLMProviderFactory.createProvider(data.llmConfig);
       }
     } catch (error) {
       console.error('Failed to initialize LLM service:', error);
@@ -306,10 +306,10 @@ class BackgroundService {
       const data = await this.getStorageData();
       data.llmConfig = config;
       await chrome.storage.local.set(data);
-      
+
       // Reinitialize LLM service with new config
-      this.llmService = new OpenAIService(config);
-      
+      this.llmService = LLMProviderFactory.createProvider(config);
+
       sendResponse({ success: true });
     } catch (error) {
       console.error('Error saving LLM config:', error);
@@ -385,7 +385,7 @@ class BackgroundService {
 
   private getDefaultLLMConfig(): LLMConfig {
     return {
-      provider: 'openai',
+      provider: 'openai' as const,
       apiKey: ''
     };
   }
