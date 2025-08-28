@@ -10,6 +10,10 @@ export class AnthropicProvider implements LLMProviderInterface {
   }
 
   async getFormMapping(request: LLMRequest): Promise<LLMResponse> {
+    if (!this.config.apiKey) {
+      throw new Error('Anthropic API key is required');
+    }
+
     const prompt = PromptBuilder.buildFormMappingPrompt(request);
 
     try {

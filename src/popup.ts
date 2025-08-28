@@ -4,8 +4,8 @@ class PopupManager {
   private profiles: UserProfile[] = [];
   private activeProfile: UserProfile | null = null;
   private llmConfig: LLMConfig = {
-    provider: 'openai',
-    apiKey: ''
+    provider: 'chrome',
+    apiKey: undefined
   };
   private enabled: boolean = true;
 
@@ -149,16 +149,19 @@ class PopupManager {
 
     switch (provider) {
       case 'openai':
-        fields.push(this.createApiKeyField('OpenAI API Key', 'sk-...', this.llmConfig.apiKey));
+        fields.push(this.createApiKeyField('OpenAI API Key', 'sk-...', this.llmConfig.apiKey || ''));
         break;
       case 'anthropic':
-        fields.push(this.createApiKeyField('Anthropic API Key', 'sk-ant-...', this.llmConfig.apiKey));
+        fields.push(this.createApiKeyField('Anthropic API Key', 'sk-ant-...', this.llmConfig.apiKey || ''));
         break;
       case 'google':
-        fields.push(this.createApiKeyField('Google AI API Key', 'your-google-api-key', this.llmConfig.apiKey));
+        fields.push(this.createApiKeyField('Google AI API Key', 'your-google-api-key', this.llmConfig.apiKey || ''));
+        break;
+      case 'chrome':
+        // Chrome's embedded LLM doesn't require an API key
         break;
       default:
-        fields.push(this.createApiKeyField('API Key', 'your-api-key', this.llmConfig.apiKey));
+        fields.push(this.createApiKeyField('API Key', 'your-api-key', this.llmConfig.apiKey || ''));
     }
 
     return fields;

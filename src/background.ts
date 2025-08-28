@@ -385,8 +385,8 @@ class BackgroundService {
 
   private getDefaultLLMConfig(): LLMConfig {
     return {
-      provider: 'openai' as const,
-      apiKey: ''
+      provider: 'chrome' as const,
+      apiKey: undefined
     };
   }
 
