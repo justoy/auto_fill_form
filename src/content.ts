@@ -1,11 +1,10 @@
 import { FormDetector } from './form-detection';
 import { FormFiller } from './form-filler';
-import { UIManager } from './ui-manager';
 
 class ContentScript {
   private formDetector = new FormDetector();
   private formFiller = new FormFiller();
-  private uiManager = new UIManager();
+  private processedForms = new WeakSet<HTMLElement>();
 
   constructor() {
     this.init();
@@ -13,7 +12,7 @@ class ContentScript {
 
   private init() {
     // Run immediately and on DOM changes
-    this.detectAndInjectButtons();
+    this.detectAndAutoFillForms();
     this.observePageChanges();
   }
 
@@ -37,7 +36,7 @@ class ContentScript {
 
       if (shouldReprocess) {
         // Debounce to avoid excessive processing
-        setTimeout(() => this.detectAndInjectButtons(), 100);
+        setTimeout(() => this.detectAndAutoFillForms(), 100);
       }
     });
 
@@ -47,15 +46,33 @@ class ContentScript {
     });
   }
 
-  private detectAndInjectButtons() {
+  private detectAndAutoFillForms() {
     const forms = this.formDetector.detectForms();
     console.log('Forms detected:', forms);
     forms.forEach((formInfo) => {
-      if (!this.uiManager.hasExistingButton(formInfo.element)) {
-        // only inject button for leaf nodes that don't have a injected button already
-        this.uiManager.injectButton(formInfo, () => this.formFiller.handleAutofill(formInfo));
+      if (!this.hasFormBeenProcessed(formInfo.element)) {
+        // Mark form as processed to prevent duplicate fills
+        this.markFormAsProcessed(formInfo.element);
+        // Automatically fill the form
+        this.formFiller.handleAutofill(formInfo).catch(error => {
+          console.error('Auto-fill failed for form:', error);
+          // Remove the processed mark on failure so it can be retried
+          this.removeProcessedMark(formInfo.element);
+        });
       }
     });
+  }
+
+  private hasFormBeenProcessed(element: HTMLElement): boolean {
+    return this.processedForms.has(element);
+  }
+
+  private markFormAsProcessed(element: HTMLElement): void {
+    this.processedForms.add(element);
+  }
+
+  private removeProcessedMark(element: HTMLElement): void {
+    this.processedForms.delete(element);
   }
 }
 
