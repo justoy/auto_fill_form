@@ -8,6 +8,7 @@ class PopupManager {
     apiKey: '',
     model: 'gpt-5-mini'
   };
+  private enabled: boolean = true;
 
   constructor() {
     this.init();
@@ -25,6 +26,12 @@ class PopupManager {
       const configResponse = await this.sendMessage({ action: 'GET_LLM_CONFIG' });
       if (configResponse.success) {
         this.llmConfig = configResponse.config;
+      }
+
+      // Load enabled setting
+      const enabledResponse = await this.sendMessage({ action: 'GET_ENABLED' });
+      if (enabledResponse.success) {
+        this.enabled = enabledResponse.enabled;
       }
 
       // Load profiles
@@ -53,6 +60,11 @@ class PopupManager {
   }
 
   private setupEventListeners() {
+    // General Settings
+    document.getElementById('autoFillEnabled')?.addEventListener('change', (e) => {
+      this.saveEnabled((e.target as HTMLInputElement).checked);
+    });
+
     // LLM Configuration
     document.getElementById('saveLLMConfig')?.addEventListener('click', () => {
       this.saveLLMConfig();
@@ -92,9 +104,17 @@ class PopupManager {
   }
 
   private renderUI() {
+    this.renderEnabledSetting();
     this.renderLLMConfig();
     this.renderProfileSelector();
     this.renderProfile();
+  }
+
+  private renderEnabledSetting() {
+    const enabledCheckbox = document.getElementById('autoFillEnabled') as HTMLInputElement;
+    if (enabledCheckbox) {
+      enabledCheckbox.checked = this.enabled;
+    }
   }
 
   private renderLLMConfig() {
@@ -439,6 +459,26 @@ class PopupManager {
     const field = category.fields.find(field => field.key === fieldKey);
     if (field) {
       field.value = value;
+    }
+  }
+
+  private async saveEnabled(enabled: boolean) {
+    this.enabled = enabled;
+
+    try {
+      const response = await this.sendMessage({
+        action: 'SAVE_ENABLED',
+        enabled
+      });
+
+      if (response.success) {
+        this.showStatus(`Auto-fill ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
+      } else {
+        this.showStatus(response.error || 'Failed to save setting', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to save enabled setting:', error);
+      this.showStatus('Failed to save setting', 'error');
     }
   }
 

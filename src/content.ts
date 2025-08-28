@@ -10,15 +10,34 @@ class ContentScript {
     this.init();
   }
 
-  private init() {
-    // Run immediately and on DOM changes
-    this.detectAndAutoFillForms();
-    this.observePageChanges();
+  private async isEnabled(): Promise<boolean> {
+    try {
+      const response = await this.sendMessage({ action: 'GET_ENABLED' });
+      return response.success ? response.enabled : true; // Default to true if error
+    } catch (error) {
+      console.error('Failed to check enabled status:', error);
+      return true; // Default to true if error
+    }
+  }
+
+  private async init() {
+    // Check if auto-fill is enabled
+    const enabled = await this.isEnabled();
+
+    if (enabled) {
+      // Run immediately and on DOM changes
+      this.detectAndAutoFillForms();
+      this.observePageChanges();
+    }
   }
 
   private observePageChanges() {
     // Watch for dynamic content changes
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(async (mutations) => {
+      // Check if auto-fill is still enabled
+      const enabled = await this.isEnabled();
+      if (!enabled) return;
+
       let shouldReprocess = false;
 
       mutations.forEach((mutation) => {
@@ -73,6 +92,12 @@ class ContentScript {
 
   private removeProcessedMark(element: HTMLElement): void {
     this.processedForms.delete(element);
+  }
+
+  private sendMessage(message: any): Promise<any> {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(message, resolve);
+    });
   }
 }
 

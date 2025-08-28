@@ -47,6 +47,7 @@ export interface StorageData {
   profiles: UserProfile[];
   activeProfileId: string | null;
   llmConfig: LLMConfig;
+  enabled: boolean;
 }
 
 // For backward compatibility with existing code

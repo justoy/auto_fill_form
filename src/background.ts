@@ -80,6 +80,14 @@ class BackgroundService {
           await this.handleGetLLMConfig(sendResponse);
           break;
 
+        case 'SAVE_ENABLED':
+          await this.handleSaveEnabled(request.enabled, sendResponse);
+          break;
+
+        case 'GET_ENABLED':
+          await this.handleGetEnabled(sendResponse);
+          break;
+
         default:
           sendResponse({ error: 'Unknown action' });
       }
@@ -305,9 +313,9 @@ class BackgroundService {
   private async handleGetLLMConfig(sendResponse: (response: any) => void) {
     try {
       const data = await this.getStorageData();
-      sendResponse({ 
-        success: true, 
-        config: data.llmConfig || this.getDefaultLLMConfig() 
+      sendResponse({
+        success: true,
+        config: data.llmConfig || this.getDefaultLLMConfig()
       });
     } catch (error) {
       console.error('Error getting LLM config:', error);
@@ -315,12 +323,38 @@ class BackgroundService {
     }
   }
 
+  private async handleSaveEnabled(enabled: boolean, sendResponse: (response: any) => void) {
+    try {
+      const data = await this.getStorageData();
+      data.enabled = enabled;
+      await chrome.storage.local.set(data);
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Error saving enabled setting:', error);
+      sendResponse({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  }
+
+  private async handleGetEnabled(sendResponse: (response: any) => void) {
+    try {
+      const data = await this.getStorageData();
+      sendResponse({
+        success: true,
+        enabled: data.enabled
+      });
+    } catch (error) {
+      console.error('Error getting enabled setting:', error);
+      sendResponse({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  }
+
   private async getStorageData(): Promise<StorageData> {
-    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'llmConfig']);
+    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'llmConfig', 'enabled']);
     return {
       profiles: result.profiles || [],
       activeProfileId: result.activeProfileId || null,
-      llmConfig: result.llmConfig || this.getDefaultLLMConfig()
+      llmConfig: result.llmConfig || this.getDefaultLLMConfig(),
+      enabled: result.enabled !== undefined ? result.enabled : true
     };
   }
 
