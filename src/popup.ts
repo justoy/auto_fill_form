@@ -1,4 +1,10 @@
-import { UserProfile, ProfileCategory, LLMConfig } from './types';
+import { UserProfile, LLMConfig } from './types';
+import { showStatus as showStatusToast } from './popup/ui/status';
+import * as api from './popup/api';
+import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderProviderConfig } from './popup/ui/llm-config';
+import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './popup/ui/enabled';
+import { renderProfileSelector as uiRenderProfileSelector, bindProfileActions } from './popup/ui/profile-select';
+import { renderProfileEditor as uiRenderProfileEditor, bindProfileEditor, addCategoryToProfile, addFieldToCategory as modelAddFieldToCategory, removeCategoryFromProfile, removeFieldFromCategory, updateFieldValueInProfile } from './popup/ui/profile-editor';
 
 class PopupManager {
   private profiles: UserProfile[] = [];
@@ -21,19 +27,16 @@ class PopupManager {
 
   private async loadData() {
     try {
-      // Load LLM config
-      const configResponse = await this.sendMessage({ action: 'GET_LLM_CONFIG' });
+      const configResponse = await api.getLLMConfig();
       if (configResponse.success) {
         this.llmConfig = configResponse.config;
       }
 
-      // Load enabled setting
-      const enabledResponse = await this.sendMessage({ action: 'GET_ENABLED' });
+      const enabledResponse = await api.getEnabled();
       if (enabledResponse.success) {
         this.enabled = enabledResponse.enabled;
       }
 
-      // Load profiles
       await this.loadProfiles();
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -43,12 +46,11 @@ class PopupManager {
 
   private async loadProfiles() {
     try {
-      const response = await this.sendMessage({ action: 'GET_PROFILES' });
+      const response = await api.getProfiles();
       if (response.success) {
         this.profiles = response.profiles;
 
-        // Get active profile
-        const activeResponse = await this.sendMessage({ action: 'GET_ACTIVE_PROFILE' });
+        const activeResponse = await api.getActiveProfile();
         if (activeResponse.success && activeResponse.profile) {
           this.activeProfile = activeResponse.profile;
         }
@@ -60,9 +62,7 @@ class PopupManager {
 
   private setupEventListeners() {
     // General Settings
-    document.getElementById('autoFillEnabled')?.addEventListener('change', (e) => {
-      this.saveEnabled((e.target as HTMLInputElement).checked);
-    });
+    bindEnabledToggle((enabled) => this.saveEnabled(enabled));
 
     // LLM Configuration
     document.getElementById('providerSelect')?.addEventListener('change', (e) => {
@@ -73,36 +73,15 @@ class PopupManager {
     });
 
     // Profile management
-    document.getElementById('profileSelect')?.addEventListener('change', (e) => {
-      this.onProfileSelect((e.target as HTMLSelectElement).value);
+    bindProfileActions({
+      onSelect: (profileId) => this.onProfileSelect(profileId),
+      onCreate: () => this.createProfile(),
+      onRename: () => this.renameProfile(),
+      onDelete: () => this.deleteProfile(),
+      onSave: () => this.saveProfile(),
     });
 
-    document.getElementById('createProfile')?.addEventListener('click', () => {
-      this.createProfile();
-    });
-
-    document.getElementById('renameProfile')?.addEventListener('click', () => {
-      this.renameProfile();
-    });
-
-    document.getElementById('deleteProfile')?.addEventListener('click', () => {
-      this.deleteProfile();
-    });
-
-    document.getElementById('saveProfile')?.addEventListener('click', () => {
-      this.saveProfile();
-    });
-
-    document.getElementById('addCategory')?.addEventListener('click', () => {
-      this.addCategory();
-    });
-
-    // Enter key on new category input
-    document.getElementById('newCategoryName')?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.addCategory();
-      }
-    });
+    bindProfileEditor(() => this.addCategory());
   }
 
   private renderUI() {
@@ -113,95 +92,11 @@ class PopupManager {
   }
 
   private renderEnabledSetting() {
-    const enabledCheckbox = document.getElementById('autoFillEnabled') as HTMLInputElement;
-    if (enabledCheckbox) {
-      enabledCheckbox.checked = this.enabled;
-    }
+    uiRenderEnabled(this.enabled);
   }
 
   private renderLLMConfig() {
-    // Set the provider selector
-    const providerSelect = document.getElementById('providerSelect') as HTMLSelectElement;
-    if (providerSelect) {
-      providerSelect.value = this.llmConfig.provider;
-    }
-
-    // Render dynamic configuration fields
-    this.renderProviderConfig();
-  }
-
-  private renderProviderConfig() {
-    const container = document.getElementById('providerConfig');
-    if (!container) return;
-
-    // Clear existing fields
-    container.innerHTML = '';
-
-    // Create configuration fields based on provider
-    const configFields = this.createProviderConfigFields(this.llmConfig.provider);
-    configFields.forEach(field => {
-      container.appendChild(field);
-    });
-  }
-
-  private createProviderConfigFields(provider: string): HTMLElement[] {
-    const fields: HTMLElement[] = [];
-
-    switch (provider) {
-      case 'openai':
-        fields.push(this.createApiKeyField('OpenAI API Key', 'sk-...', this.llmConfig.apiKey));
-        break;
-      case 'anthropic':
-        fields.push(this.createApiKeyField('Anthropic API Key', 'sk-ant-...', this.llmConfig.apiKey));
-        break;
-      case 'google':
-        fields.push(this.createApiKeyField('Google AI API Key', 'your-google-api-key', this.llmConfig.apiKey));
-        break;
-      default:
-        fields.push(this.createApiKeyField('API Key', 'your-api-key', this.llmConfig.apiKey));
-    }
-
-    return fields;
-  }
-
-  private createTextField(label: string, placeholder: string, value: string): HTMLElement {
-    const formGroup = document.createElement('div');
-    formGroup.className = 'form-group';
-
-    const labelElement = document.createElement('label');
-    labelElement.setAttribute('for', 'apiKey');
-    labelElement.textContent = label;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'apiKey';
-    input.placeholder = placeholder;
-    input.value = value || '';
-
-    formGroup.appendChild(labelElement);
-    formGroup.appendChild(input);
-
-    return formGroup;
-  }
-
-  private createApiKeyField(label: string, placeholder: string, value: string): HTMLElement {
-    const formGroup = document.createElement('div');
-    formGroup.className = 'form-group';
-
-    const labelElement = document.createElement('label');
-    labelElement.setAttribute('for', 'apiKey');
-    labelElement.textContent = label;
-
-    const input = document.createElement('input');
-    input.type = 'password';
-    input.id = 'apiKey';
-    input.placeholder = placeholder;
-    input.value = value || '';
-
-    formGroup.appendChild(labelElement);
-    formGroup.appendChild(input);
-
-    return formGroup;
+    uiRenderLLMConfig(this.llmConfig);
   }
 
   private onProviderSelect(provider: string) {
@@ -212,119 +107,20 @@ class PopupManager {
     this.llmConfig.apiKey = '';
 
     // Re-render the configuration fields
-    this.renderProviderConfig();
+    uiRenderProviderConfig(this.llmConfig.provider, this.llmConfig.apiKey);
   }
 
   private renderProfileSelector() {
-    const select = document.getElementById('profileSelect') as HTMLSelectElement;
-    if (!select) return;
-
-    // Clear existing options except the first one
-    select.innerHTML = '<option value="">Select Profile...</option>';
-
-    // Add profile options
-    this.profiles.forEach(profile => {
-      const option = document.createElement('option');
-      option.value = profile.id;
-      option.textContent = profile.name;
-      if (this.activeProfile && profile.id === this.activeProfile.id) {
-        option.selected = true;
-      }
-      select.appendChild(option);
-    });
+    uiRenderProfileSelector(this.profiles, this.activeProfile ? this.activeProfile.id : null);
   }
 
   private renderProfile() {
-    const container = document.getElementById('profileCategories');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    if (!this.activeProfile) {
-      container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No profile selected</p>';
-      return;
-    }
-
-    // Render categories
-    this.activeProfile.categories.forEach(category => {
-      const categoryDiv = this.createCategoryElement(category);
-      container.appendChild(categoryDiv);
+    uiRenderProfileEditor(this.activeProfile, {
+      onAddField: (categoryId) => this.addFieldToCategory(categoryId),
+      onRemoveCategory: (categoryId) => this.removeCategory(categoryId),
+      onRemoveField: (categoryId, fieldKey) => this.removeField(categoryId, fieldKey),
+      onUpdateField: (categoryId, fieldKey, value) => this.updateFieldValue(categoryId, fieldKey, value),
     });
-  }
-
-  private createCategoryElement(category: ProfileCategory): HTMLElement {
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = 'category';
-
-    // Category header
-    const header = document.createElement('div');
-    header.className = 'category-header';
-
-    const title = document.createElement('h3');
-    title.className = 'category-title';
-    title.textContent = category.name;
-
-    const actions = document.createElement('div');
-    actions.className = 'category-actions';
-
-    const addFieldBtn = document.createElement('button');
-    addFieldBtn.className = 'add-field-btn';
-    addFieldBtn.textContent = '+ Field';
-    addFieldBtn.addEventListener('click', () => {
-      this.addFieldToCategory(category.id);
-    });
-
-    const removeCategoryBtn = document.createElement('button');
-    removeCategoryBtn.className = 'remove-btn';
-    removeCategoryBtn.textContent = '×';
-    removeCategoryBtn.addEventListener('click', () => {
-      this.removeCategory(category.id);
-    });
-
-    actions.appendChild(addFieldBtn);
-    actions.appendChild(removeCategoryBtn);
-    header.appendChild(title);
-    header.appendChild(actions);
-    categoryDiv.appendChild(header);
-
-    // Category fields
-    category.fields.forEach(field => {
-      const fieldDiv = this.createFieldElement(category.id, field);
-      categoryDiv.appendChild(fieldDiv);
-    });
-
-    return categoryDiv;
-  }
-
-  private createFieldElement(categoryId: string, field: any): HTMLElement {
-    const fieldDiv = document.createElement('div');
-    fieldDiv.className = 'profile-field';
-
-    const label = document.createElement('label');
-    label.className = 'field-label';
-    label.textContent = field.label || field.key;
-
-    const input = document.createElement('input');
-    input.className = 'field-input';
-    input.type = 'text';
-    input.value = field.value;
-    input.placeholder = field.label || field.key;
-    input.addEventListener('input', () => {
-      this.updateFieldValue(categoryId, field.key, input.value);
-    });
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-btn';
-    removeBtn.textContent = '×';
-    removeBtn.addEventListener('click', () => {
-      this.removeField(categoryId, field.key);
-    });
-
-    fieldDiv.appendChild(label);
-    fieldDiv.appendChild(input);
-    fieldDiv.appendChild(removeBtn);
-
-    return fieldDiv;
   }
 
   private async onProfileSelect(profileId: string) {
@@ -335,7 +131,7 @@ class PopupManager {
     }
 
     try {
-      const response = await this.sendMessage({ action: 'SET_ACTIVE_PROFILE', profileId });
+      const response = await api.setActiveProfile(profileId);
       if (response.success) {
         await this.loadProfiles();
         this.renderUI();
@@ -352,7 +148,7 @@ class PopupManager {
     }
 
     try {
-      const response = await this.sendMessage({ action: 'CREATE_PROFILE', name: name.trim() });
+      const response = await api.createProfile(name.trim());
       if (response.success) {
         await this.loadProfiles();
         this.activeProfile = response.profile;
@@ -378,7 +174,7 @@ class PopupManager {
 
     const updatedProfile = { ...this.activeProfile, name: newName.trim() };
     try {
-      const response = await this.sendMessage({ action: 'UPDATE_PROFILE', profile: updatedProfile });
+      const response = await api.updateProfile(updatedProfile);
       if (response.success) {
         await this.loadProfiles();
         this.renderUI();
@@ -401,7 +197,7 @@ class PopupManager {
     }
 
     try {
-      const response = await this.sendMessage({ action: 'DELETE_PROFILE', profileId: this.activeProfile.id });
+      const response = await api.deleteProfile(this.activeProfile.id);
       if (response.success) {
         this.activeProfile = null;
         await this.loadProfiles();
@@ -421,7 +217,7 @@ class PopupManager {
     }
 
     try {
-      const response = await this.sendMessage({ action: 'UPDATE_PROFILE', profile: this.activeProfile });
+      const response = await api.updateProfile(this.activeProfile);
       if (response.success) {
         this.showStatus('Profile saved successfully', 'success');
       } else {
@@ -454,13 +250,7 @@ class PopupManager {
       return;
     }
 
-    const newCategory: ProfileCategory = {
-      id: this.generateId(),
-      name: categoryName,
-      fields: []
-    };
-
-    this.activeProfile.categories.push(newCategory);
+    addCategoryToProfile(this.activeProfile, categoryName);
     input.value = '';
     this.renderProfile();
     this.showStatus('Category added successfully', 'success');
@@ -472,42 +262,13 @@ class PopupManager {
     const fieldName = prompt('Enter field name:');
     if (!fieldName || !fieldName.trim()) return;
 
-    const category = this.activeProfile.categories.find(cat => cat.id === categoryId);
-    if (!category) return;
-
-    // Generate a unique field key
-    let fieldKey = this.generateFieldKey(fieldName);
-    let counter = 1;
-    
-    // Ensure uniqueness across entire profile
-    while (this.isFieldKeyTaken(fieldKey)) {
-      fieldKey = `${this.generateFieldKey(fieldName)}_${counter}`;
-      counter++;
-    }
-
-    category.fields.push({
-      key: fieldKey,
-      value: '',
-      label: fieldName.trim()
-    });
+    modelAddFieldToCategory(this.activeProfile, categoryId, fieldName);
 
     this.renderProfile();
     this.showStatus('Field added successfully', 'success');
   }
 
-  private generateFieldKey(fieldName: string): string {
-    return fieldName.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')  // Replace non-alphanumeric with underscores
-      .replace(/^_+|_+$/g, '');     // Remove leading/trailing underscores
-  }
-
-  private isFieldKeyTaken(fieldKey: string): boolean {
-    if (!this.activeProfile) return false;
-    
-    return this.activeProfile.categories.some(category => 
-      category.fields.some(field => field.key === fieldKey)
-    );
-  }
+  // key helpers moved to utils.ts
 
   private removeCategory(categoryId: string) {
     if (!this.activeProfile) return;
@@ -519,7 +280,7 @@ class PopupManager {
       return;
     }
 
-    this.activeProfile.categories = this.activeProfile.categories.filter(cat => cat.id !== categoryId);
+    removeCategoryFromProfile(this.activeProfile, categoryId);
     this.renderProfile();
     this.showStatus('Category removed successfully', 'success');
   }
@@ -527,10 +288,7 @@ class PopupManager {
   private removeField(categoryId: string, fieldKey: string) {
     if (!this.activeProfile) return;
 
-    const category = this.activeProfile.categories.find(cat => cat.id === categoryId);
-    if (!category) return;
-
-    category.fields = category.fields.filter(field => field.key !== fieldKey);
+    removeFieldFromCategory(this.activeProfile, categoryId, fieldKey);
     this.renderProfile();
     this.showStatus('Field removed successfully', 'success');
   }
@@ -538,23 +296,14 @@ class PopupManager {
   private updateFieldValue(categoryId: string, fieldKey: string, value: string) {
     if (!this.activeProfile) return;
 
-    const category = this.activeProfile.categories.find(cat => cat.id === categoryId);
-    if (!category) return;
-
-    const field = category.fields.find(field => field.key === fieldKey);
-    if (field) {
-      field.value = value;
-    }
+    updateFieldValueInProfile(this.activeProfile, categoryId, fieldKey, value);
   }
 
   private async saveEnabled(enabled: boolean) {
     this.enabled = enabled;
 
     try {
-      const response = await this.sendMessage({
-        action: 'SAVE_ENABLED',
-        enabled
-      });
+      const response = await api.saveEnabled(enabled);
 
       if (response.success) {
         this.showStatus(`Auto-fill ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
@@ -592,10 +341,7 @@ class PopupManager {
     };
 
     try {
-      const response = await this.sendMessage({
-        action: 'SAVE_LLM_CONFIG',
-        config: this.llmConfig
-      });
+      const response = await api.saveLLMConfig(this.llmConfig);
 
       if (response.success) {
         this.showStatus('LLM configuration saved successfully', 'success');
@@ -609,27 +355,7 @@ class PopupManager {
   }
 
   private showStatus(message: string, type: 'success' | 'error') {
-    const statusDiv = document.getElementById('status');
-    if (!statusDiv) return;
-
-    statusDiv.textContent = message;
-    statusDiv.className = `status ${type}`;
-    statusDiv.classList.remove('hidden');
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      statusDiv.classList.add('hidden');
-    }, 3000);
-  }
-
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  private sendMessage(message: any): Promise<any> {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(message, resolve);
-    });
+    showStatusToast(message, type);
   }
 }
 
