@@ -1,5 +1,5 @@
 import { LLMProviderFactory } from './llm/provider-factory';
-import { LLMConfig, LLMRequest, LLMProviderInterface, StorageData, UserProfile, ProfileCategory } from './types';
+import { LLMConfig, LLMRequest, LLMProviderInterface, StorageData, UserProfile, ProfileCategory, LegacyUserProfile } from './types';
 
 class BackgroundService {
   private llmService: LLMProviderInterface | null = null;
@@ -244,9 +244,13 @@ class BackgroundService {
       const activeProfile = data.profiles.find(p => p.id === data.activeProfileId);
 
       if (activeProfile) {
-        sendResponse({ success: true, profile: activeProfile });
+        // Convert new profile format to legacy format for backward compatibility
+        const legacyProfile = this.convertToLegacyProfile(activeProfile);
+        sendResponse({ success: true, profile: legacyProfile });
       } else {
-        sendResponse({ success: true, profile: this.getDefaultProfile() });
+        // Fall back to legacy profile for backward compatibility
+        const legacyData = await this.getLegacyStorageData();
+        sendResponse({ success: true, profile: legacyData.profile || this.getDefaultProfile() });
       }
     } catch (error) {
       console.error('Error getting profile:', error);
@@ -255,11 +259,39 @@ class BackgroundService {
   }
 
   private async handleSaveProfile(
-    profile: UserProfile,
+    profile: UserProfile | LegacyUserProfile,
     sendResponse: (response: any) => void
   ) {
     try {
-      await this.handleUpdateProfile(profile, sendResponse);
+      // Check if it's a legacy profile format
+      if (this.isLegacyProfile(profile)) {
+        // Convert legacy profile to new format
+        const data = await this.getStorageData();
+        const activeProfile = data.profiles.find(p => p.id === data.activeProfileId);
+
+        if (activeProfile) {
+          // Update existing active profile with legacy data
+          this.updateProfileFromLegacy(activeProfile, profile);
+          await this.handleUpdateProfile(activeProfile, sendResponse);
+        } else {
+          // Create new profile from legacy data
+          const newProfile: UserProfile = {
+            id: this.generateId(),
+            name: 'Default Profile',
+            categories: this.convertLegacyToCategories(profile),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          data.profiles.push(newProfile);
+          data.activeProfileId = newProfile.id;
+          await chrome.storage.local.set(data);
+          sendResponse({ success: true });
+        }
+      } else {
+        // It's already in new format
+        await this.handleUpdateProfile(profile as UserProfile, sendResponse);
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
       sendResponse({ error: error instanceof Error ? error.message : 'Unknown error' });
@@ -333,7 +365,13 @@ class BackgroundService {
     };
   }
 
-
+  private async getLegacyStorageData(): Promise<{ profile: LegacyUserProfile; llmConfig: LLMConfig }> {
+    const result = await chrome.storage.local.get(['profile', 'llmConfig']);
+    return {
+      profile: result.profile || this.getDefaultProfile(),
+      llmConfig: result.llmConfig || this.getDefaultLLMConfig()
+    };
+  }
 
   private getDefaultProfile(): UserProfile {
     return {
@@ -405,9 +443,45 @@ class BackgroundService {
     return keys;
   }
 
+  private convertToLegacyProfile(profile: UserProfile): LegacyUserProfile {
+    const legacyProfile: LegacyUserProfile = {};
+    profile.categories.forEach(category => {
+      category.fields.forEach(field => {
+        legacyProfile[field.key] = field.value;
+      });
+    });
+    return legacyProfile;
+  }
 
+  private isLegacyProfile(profile: any): profile is LegacyUserProfile {
+    return typeof profile === 'object' && profile !== null && !profile.categories && !profile.id;
+  }
 
+  private convertLegacyToCategories(legacyProfile: LegacyUserProfile): ProfileCategory[] {
+    const categories = this.getDefaultCategories();
 
+    // Map legacy fields to categories
+    Object.entries(legacyProfile).forEach(([key, value]) => {
+      categories.forEach(category => {
+        const field = category.fields.find(f => f.key === key);
+        if (field) {
+          field.value = value;
+        }
+      });
+    });
+
+    return categories;
+  }
+
+  private updateProfileFromLegacy(profile: UserProfile, legacyProfile: LegacyUserProfile): void {
+    profile.categories.forEach(category => {
+      category.fields.forEach(field => {
+        if (legacyProfile[field.key] !== undefined) {
+          field.value = legacyProfile[field.key];
+        }
+      });
+    });
+  }
 }
 
 // Initialize the background service

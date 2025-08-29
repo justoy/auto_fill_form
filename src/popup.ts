@@ -167,6 +167,26 @@ class PopupManager {
     return fields;
   }
 
+  private createTextField(label: string, placeholder: string, value: string): HTMLElement {
+    const formGroup = document.createElement('div');
+    formGroup.className = 'form-group';
+
+    const labelElement = document.createElement('label');
+    labelElement.setAttribute('for', 'apiKey');
+    labelElement.textContent = label;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'apiKey';
+    input.placeholder = placeholder;
+    input.value = value || '';
+
+    formGroup.appendChild(labelElement);
+    formGroup.appendChild(input);
+
+    return formGroup;
+  }
+
   private createApiKeyField(label: string, placeholder: string, value: string): HTMLElement {
     const formGroup = document.createElement('div');
     formGroup.className = 'form-group';

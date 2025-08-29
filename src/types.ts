@@ -53,6 +53,11 @@ export interface StorageData {
   enabled: boolean;
 }
 
+// For backward compatibility with existing code
+export interface LegacyUserProfile {
+  [key: string]: string;
+}
+
 // Chrome Prompt API types
 declare global {
   interface Window {
