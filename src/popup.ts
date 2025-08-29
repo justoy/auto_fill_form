@@ -142,90 +142,53 @@ class PopupManager {
 
   private async createProfile() {
     const name = prompt('Enter profile name:');
-    if (!name || !name.trim()) {
-      return;
-    }
+    if (!name || !name.trim()) return;
 
-    try {
-      const response = await api.createProfile(name.trim());
-      if (response.success) {
-        await this.loadProfiles();
-        this.activeProfile = response.profile;
+    await this.handleApiCall(
+      () => api.createProfile(name.trim()),
+      'Profile created successfully',
+      'Failed to create profile',
+      (res) => {
+        this.activeProfile = res.profile;
         this.renderUI();
-        this.showStatus('Profile created successfully', 'success');
       }
-    } catch (error) {
-      console.error('Failed to create profile:', error);
-      this.showStatus('Failed to create profile', 'error');
-    }
+    );
   }
 
   private async renameProfile() {
-    if (!this.activeProfile) {
-      this.showStatus('No profile selected', 'error');
-      return;
-    }
+    if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
 
     const newName = prompt('Enter new profile name:', this.activeProfile.name);
-    if (!newName || !newName.trim()) {
-      return;
-    }
+    if (!newName || !newName.trim()) return;
 
     const updatedProfile = { ...this.activeProfile, name: newName.trim() };
-    try {
-      const response = await api.updateProfile(updatedProfile);
-      if (response.success) {
-        await this.loadProfiles();
-        this.renderUI();
-        this.showStatus('Profile renamed successfully', 'success');
-      }
-    } catch (error) {
-      console.error('Failed to rename profile:', error);
-      this.showStatus('Failed to rename profile', 'error');
-    }
+    await this.handleApiCall(
+      () => api.updateProfile(updatedProfile),
+      'Profile renamed successfully',
+      'Failed to rename profile'
+    );
   }
 
   private async deleteProfile() {
-    if (!this.activeProfile) {
-      this.showStatus('No profile selected', 'error');
-      return;
-    }
+    if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
+    if (!confirm(`Are you sure you want to delete the profile "${this.activeProfile.name}"?`)) return;
 
-    if (!confirm(`Are you sure you want to delete the profile "${this.activeProfile.name}"?`)) {
-      return;
-    }
-
-    try {
-      const response = await api.deleteProfile(this.activeProfile.id);
-      if (response.success) {
-        this.activeProfile = null;
-        await this.loadProfiles();
-        this.renderUI();
-        this.showStatus('Profile deleted successfully', 'success');
-      }
-    } catch (error) {
-      console.error('Failed to delete profile:', error);
-      this.showStatus('Failed to delete profile', 'error');
-    }
+    await this.handleApiCall(
+      () => api.deleteProfile(this.activeProfile.id),
+      'Profile deleted successfully',
+      'Failed to delete profile',
+      () => { this.activeProfile = null; }
+    );
   }
 
   private async saveProfile() {
-    if (!this.activeProfile) {
-      this.showStatus('No profile selected', 'error');
-      return;
-    }
+    if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
 
-    try {
-      const response = await api.updateProfile(this.activeProfile);
-      if (response.success) {
-        this.showStatus('Profile saved successfully', 'success');
-      } else {
-        this.showStatus(response.error || 'Failed to save profile', 'error');
-      }
-    } catch (error) {
-      console.error('Failed to save profile:', error);
-      this.showStatus('Failed to save profile', 'error');
-    }
+    await this.handleApiCall(
+      () => api.updateProfile(this.activeProfile),
+      'Profile saved successfully',
+      'Failed to save profile'
+    );
   }
 
   private addCategory() {
@@ -350,6 +313,28 @@ class PopupManager {
 
   private showStatus(message: string, type: 'success' | 'error') {
     showStatusToast(message, type);
+  }
+
+  private async handleApiCall<T extends { success?: boolean; error?: string }>(
+    apiCall: () => Promise<T>,
+    successMsg: string,
+    errorMsg: string,
+    onSuccess?: (result: T) => void
+  ) {
+    try {
+      const response = await apiCall();
+      if (response.success === true) {
+        if (onSuccess) onSuccess(response);
+        await this.loadProfiles();
+        this.renderUI();
+        this.showStatus(successMsg, 'success');
+      } else {
+        this.showStatus(response.error || errorMsg, 'error');
+      }
+    } catch (error) {
+      console.error(errorMsg, error);
+      this.showStatus(errorMsg, 'error');
+    }
   }
 }
 
