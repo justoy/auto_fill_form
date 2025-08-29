@@ -211,6 +211,9 @@ class PopupManager {
     // Update the configuration provider
     this.llmConfig.provider = provider as any;
 
+    // Clear the API key when switching providers
+    this.llmConfig.apiKey = '';
+
     // Re-render the configuration fields
     this.renderProviderConfig();
   }
