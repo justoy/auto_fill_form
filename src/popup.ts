@@ -65,8 +65,8 @@ class PopupManager {
     bindEnabledToggle((enabled) => this.saveEnabled(enabled));
 
     // LLM Configuration
-    document.getElementById('providerSelect')?.addEventListener('change', (e) => {
-      this.onProviderSelect((e.target as HTMLSelectElement).value);
+    document.getElementById('providerSelect')?.addEventListener('change', async (e) => {
+      await this.onProviderSelect((e.target as HTMLSelectElement).value);
     });
     document.getElementById('saveLLMConfig')?.addEventListener('click', () => {
       this.saveLLMConfig();
@@ -99,12 +99,11 @@ class PopupManager {
     uiRenderLLMConfig(this.llmConfig);
   }
 
-  private onProviderSelect(provider: string) {
-    // Update the configuration provider
-    this.llmConfig.provider = provider as any;
-
-    // Clear the API key when switching providers
-    this.llmConfig.apiKey = '';
+  private async onProviderSelect(provider: string) {
+    // Fetch saved config for this provider first
+    const resp = await api.getProviderLLMConfig(provider);
+    const cfg = resp.success && resp.config ? resp.config : { provider: provider as any, apiKey: '' };
+    this.llmConfig = cfg;
 
     // Re-render the configuration fields
     uiRenderProviderConfig(this.llmConfig.provider, this.llmConfig.apiKey);
@@ -324,11 +323,6 @@ class PopupManager {
 
     const apiKey = apiKeyInput.value.trim();
     const provider = providerSelect.value;
-
-    if (!apiKey) {
-      this.showStatus('Please enter an API key', 'error');
-      return;
-    }
 
     if (!provider) {
       this.showStatus('Please select a provider', 'error');

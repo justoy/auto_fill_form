@@ -14,6 +14,10 @@ export async function getLLMConfig() {
   return sendMessage<{ config: LLMConfig }>({ action: 'GET_LLM_CONFIG' });
 }
 
+export async function getProviderLLMConfig(provider: string) {
+  return sendMessage<{ config: LLMConfig }>({ action: 'GET_PROVIDER_LLM_CONFIG', provider });
+}
+
 export async function saveLLMConfig(config: LLMConfig) {
   return sendMessage({ action: 'SAVE_LLM_CONFIG', config });
 }

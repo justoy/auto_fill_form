@@ -51,7 +51,10 @@ export interface FormInfo {
 export interface StorageData {
   profiles: UserProfile[];
   activeProfileId: string | null;
-  llmConfig: LLMConfig;
+  // Currently selected provider and its key
+  activeLlmConfig: LLMConfig;
+  // Persist keys per provider so switching does not lose them
+  llmConfigs: Partial<Record<LLMProvider, LLMConfig>>;
   enabled: boolean;
 }
 

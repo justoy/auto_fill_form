@@ -28,8 +28,8 @@ class BackgroundService {
   private async initializeLLMService() {
     try {
       const data = await this.getStorageData();
-      if (data.llmConfig?.apiKey) {
-        this.llmService = LLMProviderFactory.createProvider(data.llmConfig);
+      if (data.activeLlmConfig?.apiKey) {
+        this.llmService = LLMProviderFactory.createProvider(data.activeLlmConfig);
       }
     } catch (error) {
       console.error('Failed to initialize LLM service:', error);
@@ -85,6 +85,10 @@ class BackgroundService {
 
         case 'GET_LLM_CONFIG':
           await this.handleGetLLMConfig(sendResponse);
+          break;
+
+        case 'GET_PROVIDER_LLM_CONFIG':
+          await this.handleGetProviderLLMConfig(request.provider, sendResponse);
           break;
 
         case 'SAVE_ENABLED':
@@ -304,11 +308,17 @@ class BackgroundService {
   ) {
     try {
       const data = await this.getStorageData();
-      data.llmConfig = config;
+
+      // Persist per-provider configs and set as active
+      data.llmConfigs = data.llmConfigs || {};
+      data.llmConfigs[config.provider] = { ...config };
+      data.activeLlmConfig = { ...config };
       await chrome.storage.local.set(data);
 
-      // Reinitialize LLM service with new config
-      this.llmService = LLMProviderFactory.createProvider(config);
+      // Reinitialize LLM service with new active config
+      if (config.apiKey) {
+        this.llmService = LLMProviderFactory.createProvider(config);
+      }
 
       sendResponse({ success: true });
     } catch (error) {
@@ -322,10 +332,22 @@ class BackgroundService {
       const data = await this.getStorageData();
       sendResponse({
         success: true,
-        config: data.llmConfig || this.getDefaultLLMConfig()
+        config: data.activeLlmConfig || this.getDefaultLLMConfig()
       });
     } catch (error) {
       console.error('Error getting LLM config:', error);
+      sendResponse({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  }
+
+  private async handleGetProviderLLMConfig(provider: string, sendResponse: (response: any) => void) {
+    try {
+      const data = await this.getStorageData();
+      const stored = data.llmConfigs?.[provider as keyof typeof data.llmConfigs];
+      const fallback: LLMConfig = { provider: provider as any, apiKey: '' };
+      sendResponse({ success: true, config: stored || fallback });
+    } catch (error) {
+      console.error('Error getting provider LLM config:', error);
       sendResponse({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   }
@@ -356,13 +378,24 @@ class BackgroundService {
   }
 
   private async getStorageData(): Promise<StorageData> {
-    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'llmConfig', 'enabled']);
+    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'activeLlmConfig', 'llmConfigs', 'llmConfig', 'enabled']);
+
+    // Migrate legacy llmConfig -> activeLlmConfig/llmConfigs
+    let activeLlmConfig: LLMConfig | undefined = result.activeLlmConfig;
+    let llmConfigs: any = result.llmConfigs || {};
+    if (!activeLlmConfig && result.llmConfig) {
+      activeLlmConfig = result.llmConfig as LLMConfig;
+      llmConfigs[activeLlmConfig.provider] = activeLlmConfig;
+      await chrome.storage.local.set({ activeLlmConfig, llmConfigs });
+    }
+
     return {
       profiles: result.profiles || [],
       activeProfileId: result.activeProfileId || null,
-      llmConfig: result.llmConfig || this.getDefaultLLMConfig(),
+      activeLlmConfig: activeLlmConfig || this.getDefaultLLMConfig(),
+      llmConfigs: llmConfigs || {},
       enabled: result.enabled !== undefined ? result.enabled : true
-    };
+    } as StorageData;
   }
 
   private async getLegacyStorageData(): Promise<{ profile: LegacyUserProfile; llmConfig: LLMConfig }> {
