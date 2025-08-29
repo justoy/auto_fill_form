@@ -18,11 +18,11 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
-export type LLMProvider = 'openai' | 'anthropic' | 'google' | 'chrome';
+export type LLMProvider = 'openai' | 'anthropic' | 'google';
 
 export interface LLMConfig {
   provider: LLMProvider;
-  apiKey?: string;
+  apiKey: string;
 }
 
 export interface FormMapping {
@@ -58,17 +58,4 @@ export interface StorageData {
 // For backward compatibility with existing code
 export interface LegacyUserProfile {
   [key: string]: string;
-}
-
-// Chrome Prompt API types
-declare global {
-  interface Window {
-    ai?: {
-      createTextSession(): Promise<ChromeAITextSession>;
-    };
-  }
-}
-
-interface ChromeAITextSession {
-  prompt(prompt: string): Promise<string>;
 }

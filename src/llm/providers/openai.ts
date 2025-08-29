@@ -10,10 +10,6 @@ export class OpenAIProvider implements LLMProviderInterface {
   }
 
   async getFormMapping(request: LLMRequest): Promise<LLMResponse> {
-    if (!this.config.apiKey) {
-      throw new Error('OpenAI API key is required');
-    }
-
     const prompt = PromptBuilder.buildFormMappingPrompt(request);
 
     try {
