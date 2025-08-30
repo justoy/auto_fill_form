@@ -162,3 +162,10 @@ Key points (see full policy in PRIVACY.md):
 ## License
 
 MIT License - see LICENSE file for details
+
+## Packaging for Chrome Web Store
+
+- Build and zip: run `npm run pack`.
+- Output: a versioned ZIP under `release/` (e.g., `release/llm-autofill-extension-v1.0.0.zip`).
+- Included files: `manifest.json`, `dist/`, `icons/`, and `settings.html`.
+- Version sync: the staged `manifest.json` version is aligned to `package.json`.
