@@ -11,4 +11,3 @@ export function showStatus(message: string, type: 'success' | 'error'): void {
   }, 3000);
 }
 
-

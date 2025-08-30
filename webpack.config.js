@@ -5,7 +5,7 @@ module.exports = {
   entry: {
     background: './src/background.ts',
     content: './src/content.ts',
-    popup: './src/popup.ts'
+    settings: './src/settings.ts'
   },
   module: {
     rules: [
@@ -27,7 +27,7 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: 'popup.html', to: 'popup.html' },
+        { from: 'settings.html', to: 'settings.html' },
       ],
     }),
   ],

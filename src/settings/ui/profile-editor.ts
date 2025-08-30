@@ -1,13 +1,6 @@
 import { UserProfile, ProfileCategory } from '../../types';
 import { generateId, generateFieldKey, isFieldKeyTaken } from '../utils';
 
-type Handlers = {
-  onAddField: (categoryId: string) => void;
-  onRemoveCategory: (categoryId: string) => void;
-  onRemoveField: (categoryId: string, fieldKey: string) => void;
-  onUpdateField: (categoryId: string, fieldKey: string, value: string) => void;
-};
-
 export function renderProfileEditor(profile: UserProfile | null, handlers: Handlers): void {
   const container = document.getElementById('profileCategories');
   if (!container) return;
@@ -15,7 +8,10 @@ export function renderProfileEditor(profile: UserProfile | null, handlers: Handl
   container.innerHTML = '';
 
   if (!profile) {
-    container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No profile selected</p>';
+    const msg = document.createElement('div');
+    msg.className = 'profile-empty';
+    msg.textContent = 'No profile selected.';
+    container.appendChild(msg);
     return;
   }
 
@@ -85,30 +81,35 @@ function createFieldElement(
   const fieldDiv = document.createElement('div');
   fieldDiv.className = 'profile-field';
 
-  const label = document.createElement('label');
+  const label = document.createElement('div');
   label.className = 'field-label';
   label.textContent = fieldLabel;
 
+  const inputContainer = document.createElement('div');
+  inputContainer.className = 'field-input';
+
   const input = document.createElement('input');
-  input.className = 'field-input';
   input.type = 'text';
-  input.value = fieldValue;
-  input.placeholder = fieldLabel;
-  input.addEventListener('input', () => handlers.onUpdateField(categoryId, fieldKey, input.value));
+  input.value = fieldValue || '';
+  input.placeholder = 'Enter value';
+  input.addEventListener('change', (e) => {
+    const newValue = (e.target as HTMLInputElement).value;
+    handlers.onUpdateFieldValue(categoryId, fieldKey, newValue);
+  });
 
   const removeBtn = document.createElement('button');
   removeBtn.className = 'remove-btn';
-  removeBtn.textContent = '×';
+  removeBtn.textContent = 'Remove';
   removeBtn.addEventListener('click', () => handlers.onRemoveField(categoryId, fieldKey));
 
+  inputContainer.appendChild(input);
   fieldDiv.appendChild(label);
-  fieldDiv.appendChild(input);
+  fieldDiv.appendChild(inputContainer);
   fieldDiv.appendChild(removeBtn);
 
   return fieldDiv;
 }
 
-// Pure operations to mutate the UserProfile model
 export function addCategoryToProfile(profile: UserProfile, categoryName: string): void {
   const newCategory: ProfileCategory = {
     id: generateId(),
@@ -122,14 +123,10 @@ export function addFieldToCategory(profile: UserProfile, categoryId: string, fie
   const category = profile.categories.find((c) => c.id === categoryId);
   if (!category) return;
 
-  let fieldKey = generateFieldKey(fieldName);
-  let counter = 1;
-  while (isFieldKeyTaken(profile, fieldKey)) {
-    fieldKey = `${generateFieldKey(fieldName)}_${counter}`;
-    counter++;
-  }
+  const fieldKey = generateFieldKey(fieldName);
+  if (!fieldKey || isFieldKeyTaken(profile, fieldKey)) return;
 
-  category.fields.push({ key: fieldKey, value: '', label: fieldName.trim() });
+  category.fields.push({ key: fieldKey, label: fieldName, value: '' });
 }
 
 export function removeCategoryFromProfile(profile: UserProfile, categoryId: string): void {
@@ -142,11 +139,23 @@ export function removeFieldFromCategory(profile: UserProfile, categoryId: string
   category.fields = category.fields.filter((f) => f.key !== fieldKey);
 }
 
-export function updateFieldValueInProfile(profile: UserProfile, categoryId: string, fieldKey: string, value: string): void {
+export function updateFieldValueInProfile(
+  profile: UserProfile,
+  categoryId: string,
+  fieldKey: string,
+  value: string
+): void {
   const category = profile.categories.find((c) => c.id === categoryId);
   if (!category) return;
   const field = category.fields.find((f) => f.key === fieldKey);
-  if (field) field.value = value;
+  if (!field) return;
+  field.value = value;
 }
 
+type Handlers = {
+  onAddField: (categoryId: string) => void;
+  onRemoveCategory: (categoryId: string) => void;
+  onRemoveField: (categoryId: string, fieldKey: string) => void;
+  onUpdateFieldValue: (categoryId: string, fieldKey: string, value: string) => void;
+};
 

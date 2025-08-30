@@ -1,11 +1,11 @@
-# LLM Autofill Extension
+# Seamless Form AutoFiller Chrome Extension
 
 A powerful Chrome extension that uses Large Language Models to automatically detect and suggest completions for web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection with tab-key confirmation for enhanced productivity.
 
 ## What's New 🚀
 
 - **⚡ Auto-Fill with Tab Confirmation**: Forms are automatically detected and filled with suggestions - press Tab to accept
-- **🎛️ Enable/Disable Toggle**: Easy toggle in the popup to turn auto-fill on/off
+- **🎛️ Enable/Disable Toggle**: Easy toggle in the Settings to turn auto-fill on/off
 - **📂 Profile Categories**: Organize your data into logical groups (Personal, Address, Passport, etc.)
 - **👥 Multiple Profiles**: Create separate profiles for work, personal, travel, and more
 - **🎛️ Simplified Field Management**: Just enter field names - keys are auto-generated
@@ -82,9 +82,9 @@ A powerful Chrome extension that uses Large Language Models to automatically det
 
 ### Enable/Disable Auto-Fill
 
-- **Enable**: Check the "Enable Auto-Fill" toggle in the extension popup
+- **Enable**: Check the "Enable Auto-Fill" toggle in the extension settings
 - **Disable**: Uncheck the toggle to stop automatic form detection
-- **Quick Toggle**: Access the extension popup by clicking the extension icon in your browser toolbar
+- **Quick Toggle**: Access the extension settings by clicking the extension icon in your browser toolbar
 
 ## How It Works
 
@@ -117,7 +117,7 @@ The extension supports multiple profiles with organized categories for better da
 - All changes are automatically saved
 
 ### Switching Profiles
-- Use the dropdown in the extension popup to switch between profiles
+- Use the dropdown in the extension settings to switch between profiles
 - Each profile maintains its own data independently
 - Perfect for different contexts (work vs personal vs travel)
 
@@ -145,12 +145,12 @@ The extension supports multiple profiles with organized categories for better da
 ```
 src/
 ├── background.ts       # Service worker for LLM API calls and profile management
-├── content.ts         # Content script for form detection and filling
-├── popup.ts          # Popup UI for profile and settings management
-├── types.ts          # TypeScript type definitions (profiles, categories, LLM config)
-├── form-filler.ts    # Form filling logic with profile compatibility
+├── content.ts          # Content script for form detection and filling
+├── settings.ts         # Settings page UI for profile and configuration management
+├── types.ts            # TypeScript type definitions (profiles, categories, LLM config)
+├── form-filler.ts      # Form filling logic with profile compatibility
 └── llm/
-    └── openai.ts     # OpenAI API integration
+    └── openai.ts       # OpenAI API integration
 ```
 
 ## License

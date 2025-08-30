@@ -1,14 +1,14 @@
 import { UserProfile, LLMConfig } from './types';
-import { showStatus as showStatusToast } from './popup/ui/status';
-import { setButtonState } from './popup/ui/button-animations';
-import * as api from './popup/api';
-import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderProviderConfig } from './popup/ui/llm-config';
-import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './popup/ui/enabled';
-import { renderProfileSelector as uiRenderProfileSelector, bindProfileActions } from './popup/ui/profile-select';
-import { renderProfileEditor as uiRenderProfileEditor, bindProfileEditor, addCategoryToProfile, addFieldToCategory as modelAddFieldToCategory, removeCategoryFromProfile, removeFieldFromCategory, updateFieldValueInProfile } from './popup/ui/profile-editor';
-import { generateId } from './popup/utils';
+import { showStatus as showStatusToast } from './settings/ui/status';
+import { setButtonState } from './settings/ui/button-animations';
+import * as api from './settings/api';
+import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderProviderConfig } from './settings/ui/llm-config';
+import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './settings/ui/enabled';
+import { renderProfileSelector as uiRenderProfileSelector, bindProfileActions } from './settings/ui/profile-select';
+import { renderProfileEditor as uiRenderProfileEditor, bindProfileEditor, addCategoryToProfile, addFieldToCategory as modelAddFieldToCategory, removeCategoryFromProfile, removeFieldFromCategory, updateFieldValueInProfile } from './settings/ui/profile-editor';
+import { generateId } from './settings/utils';
 
-class PopupManager {
+class SettingsManager {
   private profiles: UserProfile[] = [];
   private activeProfile: UserProfile | null = null;
   private llmConfig: LLMConfig = {
@@ -128,7 +128,7 @@ class PopupManager {
       onAddField: (categoryId) => this.addFieldToCategory(categoryId),
       onRemoveCategory: (categoryId) => this.removeCategory(categoryId),
       onRemoveField: (categoryId, fieldKey) => this.removeField(categoryId, fieldKey),
-      onUpdateField: (categoryId, fieldKey, value) => this.updateFieldValue(categoryId, fieldKey, value),
+      onUpdateFieldValue: (categoryId, fieldKey, value) => this.updateFieldValue(categoryId, fieldKey, value),
     });
   }
 
@@ -491,5 +491,5 @@ class PopupManager {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new PopupManager();
+  new SettingsManager();
 });

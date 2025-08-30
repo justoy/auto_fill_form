@@ -43,3 +43,4 @@ export function setButtonState(buttonId: string, state: ButtonState): void {
       break;
   }
 }
+
