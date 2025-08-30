@@ -131,6 +131,87 @@
       box-shadow: none;
     }
 
+    /* Animated Button Styles */
+    #saveLLMConfig, #saveProfile {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 120ms ease, background-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    #saveLLMConfig:disabled, #saveProfile:disabled {
+      opacity: 0.8;
+      cursor: default;
+    }
+
+    .btn__spinner, .btn__icon-check {
+      width: 14px;
+      height: 14px;
+      display: none;
+    }
+
+    .btn__spinner {
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 900ms linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .is-loading .btn__spinner {
+      display: inline-block;
+    }
+
+    .is-loading .btn__label {
+      opacity: 0;
+    }
+
+    .is-success {
+      background: var(--success) !important;
+    }
+
+    .is-success .btn__icon-check {
+      display: inline-block;
+    }
+
+    .is-success .btn__label {
+      opacity: 0;
+    }
+
+    .is-success {
+      animation: success-pop 320ms ease;
+    }
+
+    @keyframes success-pop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .is-error {
+      background: var(--error) !important;
+      box-shadow: 0 0 0 2px rgba(239,68,68,0.35) inset;
+      animation: shake 280ms ease;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      60% { transform: translateX(3px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .is-success, .is-error {
+        animation: none !important;
+        transition: background-color 160ms ease, opacity 160ms ease;
+      }
+    }
+
     .button-secondary {
       background: var(--secondary);
     }
@@ -439,7 +520,11 @@
       <div id="providerConfig">
         <!-- Dynamic configuration fields will be inserted here -->
       </div>
-      <button id="saveLLMConfig">Save LLM Configuration</button>
+      <button id="saveLLMConfig" aria-live="polite" aria-label="Save LLM configuration">
+        <span class="btn__label">Save LLM Configuration</span>
+        <span class="btn__spinner" aria-hidden="true"></span>
+        <span class="btn__icon-check" aria-hidden="true">✔︎</span>
+      </button>
     </div>
 
     <div class="section">
@@ -469,7 +554,11 @@
         <button id="addCategory" class="button-secondary">Add Category</button>
       </div>
 
-      <button id="saveProfile">Save Profile</button>
+      <button id="saveProfile" aria-live="polite" aria-label="Save profile">
+        <span class="btn__label">Save Profile</span>
+        <span class="btn__spinner" aria-hidden="true"></span>
+        <span class="btn__icon-check" aria-hidden="true">✔︎</span>
+      </button>
     </div>
 
     <div id="status" class="status hidden"></div>

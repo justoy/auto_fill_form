@@ -1,5 +1,6 @@
 import { UserProfile, LLMConfig } from './types';
 import { showStatus as showStatusToast } from './popup/ui/status';
+import { setButtonState } from './popup/ui/button-animations';
 import * as api from './popup/api';
 import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderProviderConfig } from './popup/ui/llm-config';
 import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './popup/ui/enabled';
@@ -185,11 +186,23 @@ class PopupManager {
   private async saveProfile() {
     if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
     const activeProfile = this.activeProfile!;
-    await this.handleApiCall(
-      () => api.updateProfile(activeProfile),
-      'Profile saved successfully',
-      'Failed to save profile'
-    );
+
+    setButtonState('saveProfile', 'loading');
+
+    try {
+      const response = await api.updateProfile(activeProfile);
+      if (response.success) {
+        setButtonState('saveProfile', 'success');
+        this.showStatus('Profile saved successfully', 'success');
+      } else {
+        setButtonState('saveProfile', 'error');
+        this.showStatus(response.error || 'Failed to save profile', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      setButtonState('saveProfile', 'error');
+      this.showStatus('Failed to save profile', 'error');
+    }
   }
 
   private addCategory() {
@@ -298,16 +311,21 @@ class PopupManager {
       apiKey
     };
 
+    setButtonState('saveLLMConfig', 'loading');
+
     try {
       const response = await api.saveLLMConfig(this.llmConfig);
 
       if (response.success) {
+        setButtonState('saveLLMConfig', 'success');
         this.showStatus('LLM configuration saved successfully', 'success');
       } else {
+        setButtonState('saveLLMConfig', 'error');
         this.showStatus(response.error || 'Failed to save configuration', 'error');
       }
     } catch (error) {
       console.error('Failed to save LLM config:', error);
+      setButtonState('saveLLMConfig', 'error');
       this.showStatus('Failed to save configuration', 'error');
     }
   }
