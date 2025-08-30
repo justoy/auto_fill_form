@@ -1,9 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "LLM Autofill Extension",
+  "name": "Seamless Agent Form Filler",
   "version": "1.0.0",
-  "description": "Automatically fill web forms using LLM-powered field mapping",
-  
+  "description": "Fill out forms instantly with AI. Supports OpenAI GPT, Anthropic Claude, and Google Gemini. Save time, reduce errors, and customize profiles for any website.",
+  // "icons": {
+  //   "16": "icons/icon16.png",
+  //   "48": "icons/icon48.png",
+  //   "128": "icons/icon128.png"
+  // },
   "permissions": [
     "storage",
     "activeTab",
@@ -11,7 +15,9 @@
   ],
   
   "host_permissions": [
-    "https://api.openai.com/*"
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://generativelanguage.googleapis.com/*"
   ],
   
   "background": {
@@ -27,7 +33,7 @@
   ],
   
   "action": {
-    "default_title": "LLM Autofill Settings"
+    "default_title": "Seamless Agent Form Filler"
   },
 
   "options_page": "popup.html",

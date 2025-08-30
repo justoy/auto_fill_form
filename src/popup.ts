@@ -171,10 +171,11 @@ class PopupManager {
 
   private async deleteProfile() {
     if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
-    if (!confirm(`Are you sure you want to delete the profile "${this.activeProfile.name}"?`)) return;
+    const activeProfile = this.activeProfile!;
+    if (!confirm(`Are you sure you want to delete the profile "${activeProfile.name}"?`)) return;
 
     await this.handleApiCall(
-      () => api.deleteProfile(this.activeProfile.id),
+      () => api.deleteProfile(activeProfile.id),
       'Profile deleted successfully',
       'Failed to delete profile',
       () => { this.activeProfile = null; }
@@ -183,9 +184,9 @@ class PopupManager {
 
   private async saveProfile() {
     if (!this.activeProfile) return this.showStatus('No profile selected', 'error');
-
+    const activeProfile = this.activeProfile!;
     await this.handleApiCall(
-      () => api.updateProfile(this.activeProfile),
+      () => api.updateProfile(activeProfile),
       'Profile saved successfully',
       'Failed to save profile'
     );
