@@ -1,7 +1,5 @@
 Seamless Form AutoFiller — Privacy Policy
 
-Last updated: 2025‑08‑30
-
 This Privacy Policy describes how the Seamless Form AutoFiller Chrome extension (the “Extension”) handles information. We value your privacy and design the Extension to minimize data collection and processing.
 
 Information Processed by the Extension (not collected by the developer)
@@ -48,12 +46,3 @@ Data Retention
 
 Security
 - Data is stored using Chrome’s extension storage. We recommend protecting your device and browser profile with appropriate security measures.
-
-Children’s Privacy
-- The Extension is not directed to children under 13 and does not knowingly collect personal information from children.
-
-Changes to This Policy
-- We may update this policy from time to time. Material changes will be reflected by updating the “Last updated” date above.
-
-Contact
-For questions or concerns about this policy, please open an issue on the project repository or contact the developer at: hello@aetherrim.com
