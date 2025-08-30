@@ -155,10 +155,10 @@
           <details class="section" open>
             <summary>Personal Information</summary>
             <div class="grid">
-              <div class="field"><label for="first_name">First Name</label><input id="first_name" name="first_name" autocomplete="given-name" placeholder="John" /></div>
-              <div class="field"><label for="last_name">Last Name</label><input id="last_name" name="last_name" autocomplete="family-name" placeholder="Doe" /></div>
-              <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="john.doe@example.com" /></div>
-              <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567" /></div>
+              <div class="field"><label for="first_name">First Name</label><input id="first_name" name="first_name" autocomplete="given-name" /></div>
+              <div class="field"><label for="last_name">Last Name</label><input id="last_name" name="last_name" autocomplete="family-name" /></div>
+              <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" /></div>
+              <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" autocomplete="tel" /></div>
             </div>
           </details>
 
@@ -166,15 +166,15 @@
           <details class="section">
             <summary>Address</summary>
             <div class="grid">
-              <div class="field"><label for="addr_line1">Address Line 1</label><input id="addr_line1" name="addr_line1" autocomplete="address-line1" placeholder="123 Main St" /></div>
-              <div class="field"><label for="addr_line2">Address Line 2</label><input id="addr_line2" name="addr_line2" autocomplete="address-line2" placeholder="Apt, suite, etc." /></div>
-              <div class="field"><label for="city">City</label><input id="city" name="city" autocomplete="address-level2" placeholder="Springfield" /></div>
-              <div class="field"><label for="state">State</label><input id="state" name="state" autocomplete="address-level1" placeholder="CA" /></div>
-              <div class="field"><label for="postal_code">Postal Code</label><input id="postal_code" name="postal_code" autocomplete="postal-code" placeholder="94107" /></div>
+              <div class="field"><label for="addr_line1">Address Line 1</label><input id="addr_line1" name="addr_line1" autocomplete="address-line1" /></div>
+              <div class="field"><label for="addr_line2">Address Line 2</label><input id="addr_line2" name="addr_line2" autocomplete="address-line2" /></div>
+              <div class="field"><label for="city">City</label><input id="city" name="city" autocomplete="address-level2" /></div>
+              <div class="field"><label for="state">State</label><input id="state" name="state" autocomplete="address-level1" /></div>
+              <div class="field"><label for="postal_code">Postal Code</label><input id="postal_code" name="postal_code" autocomplete="postal-code" /></div>
               <div class="field">
                 <label for="country">Country</label>
                 <select id="country" name="country" autocomplete="country">
-                  <option value="">Select...</option>
+                  <option value=""></option>
                   <option>USA</option>
                   <option>Canada</option>
                   <option>United Kingdom</option>
@@ -189,10 +189,10 @@
           <details class="section">
             <summary>Passport</summary>
             <div class="grid">
-              <div class="field"><label for="passport_num">Passport Number</label><input id="passport_num" name="passport_num" placeholder="X12345678" /></div>
-              <div class="field"><label for="passport_country">Passport Country</label><input id="passport_country" name="passport_country" placeholder="USA" /></div>
-              <div class="field"><label for="nationality">Nationality</label><input id="nationality" name="nationality" placeholder="American" /></div>
-              <div class="field"><label for="passport_issue_place">Place of Issue</label><input id="passport_issue_place" name="passport_issue_place" placeholder="San Francisco" /></div>
+              <div class="field"><label for="passport_num">Passport Number</label><input id="passport_num" name="passport_num" /></div>
+              <div class="field"><label for="passport_country">Passport Country</label><input id="passport_country" name="passport_country" /></div>
+              <div class="field"><label for="nationality">Nationality</label><input id="nationality" name="nationality" /></div>
+              <div class="field"><label for="passport_issue_place">Place of Issue</label><input id="passport_issue_place" name="passport_issue_place" /></div>
               <div class="field"><label for="passport_issue_date">Issue Date</label><input id="passport_issue_date" name="passport_issue_date" type="date" /></div>
               <div class="field"><label for="passport_expiry_date">Expiry Date</label><input id="passport_expiry_date" name="passport_expiry_date" type="date" /></div>
             </div>
@@ -202,10 +202,10 @@
           <details class="section">
             <summary>Employment</summary>
             <div class="grid">
-              <div class="field"><label for="company_name">Company Name</label><input id="company_name" name="company_name" placeholder="Acme Corp" /></div>
-              <div class="field"><label for="job_title">Job Title</label><input id="job_title" name="job_title" placeholder="Senior Engineer" /></div>
-              <div class="field"><label for="work_email">Work Email</label><input id="work_email" name="work_email" type="email" placeholder="john.doe@acme.com" /></div>
-              <div class="field"><label for="work_phone">Work Phone</label><input id="work_phone" name="work_phone" type="tel" placeholder="+1 555 987 6543" /></div>
+              <div class="field"><label for="company_name">Company Name</label><input id="company_name" name="company_name" /></div>
+              <div class="field"><label for="job_title">Job Title</label><input id="job_title" name="job_title" /></div>
+              <div class="field"><label for="work_email">Work Email</label><input id="work_email" name="work_email" type="email" /></div>
+              <div class="field"><label for="work_phone">Work Phone</label><input id="work_phone" name="work_phone" type="tel" /></div>
             </div>
           </details>
 
@@ -213,11 +213,11 @@
           <details class="section">
             <summary>Payment</summary>
             <div class="grid">
-              <div class="field"><label for="card_name">Name on Card</label><input id="card_name" name="card_name" placeholder="JOHN A DOE" /></div>
-              <div class="field"><label for="card_number">Card Number</label><input id="card_number" name="card_number" inputmode="numeric" placeholder="4242 4242 4242 4242" /></div>
-              <div class="field"><label for="card_expiry">Expiry</label><input id="card_expiry" name="card_expiry" placeholder="MM/YY" /></div>
-              <div class="field"><label for="card_cvv">CVV</label><input id="card_cvv" name="card_cvv" inputmode="numeric" placeholder="123" /></div>
-              <div class="field"><label for="billing_zip">Billing ZIP</label><input id="billing_zip" name="billing_zip" inputmode="numeric" placeholder="94107" /></div>
+              <div class="field"><label for="card_name">Name on Card</label><input id="card_name" name="card_name" /></div>
+              <div class="field"><label for="card_number">Card Number</label><input id="card_number" name="card_number" inputmode="numeric" /></div>
+              <div class="field"><label for="card_expiry">Expiry</label><input id="card_expiry" name="card_expiry" /></div>
+              <div class="field"><label for="card_cvv">CVV</label><input id="card_cvv" name="card_cvv" inputmode="numeric" /></div>
+              <div class="field"><label for="billing_zip">Billing ZIP</label><input id="billing_zip" name="billing_zip" inputmode="numeric" /></div>
             </div>
           </details>
 
@@ -225,9 +225,9 @@
           <details class="section">
             <summary>Social</summary>
             <div class="grid">
-              <div class="field"><label for="twitter_handle">Twitter Handle</label><input id="twitter_handle" name="twitter_handle" placeholder="@johndoe" /></div>
-              <div class="field"><label for="linkedin_url">LinkedIn URL</label><input id="linkedin_url" name="linkedin_url" type="url" placeholder="https://www.linkedin.com/in/johndoe" /></div>
-              <div class="field"><label for="website">Website</label><input id="website" name="website" type="url" placeholder="https://johndoe.dev" /></div>
+              <div class="field"><label for="twitter_handle">Twitter Handle</label><input id="twitter_handle" name="twitter_handle" /></div>
+              <div class="field"><label for="linkedin_url">LinkedIn URL</label><input id="linkedin_url" name="linkedin_url" type="url" /></div>
+              <div class="field"><label for="website">Website</label><input id="website" name="website" type="url" /></div>
             </div>
           </details>
 
@@ -235,9 +235,9 @@
           <details class="section">
             <summary>Education</summary>
             <div class="grid">
-              <div class="field"><label for="school_name">School Name</label><input id="school_name" name="school_name" placeholder="State University" /></div>
-              <div class="field"><label for="degree">Degree</label><input id="degree" name="degree" placeholder="B.S. Computer Science" /></div>
-              <div class="field"><label for="graduation_year">Graduation Year</label><input id="graduation_year" name="graduation_year" inputmode="numeric" placeholder="2015" /></div>
+              <div class="field"><label for="school_name">School Name</label><input id="school_name" name="school_name" /></div>
+              <div class="field"><label for="degree">Degree</label><input id="degree" name="degree" /></div>
+              <div class="field"><label for="graduation_year">Graduation Year</label><input id="graduation_year" name="graduation_year" inputmode="numeric" /></div>
             </div>
           </details>
 
@@ -264,4 +264,3 @@
   </script>
 </body>
 </html>
-

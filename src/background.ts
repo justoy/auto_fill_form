@@ -27,54 +27,30 @@ class BackgroundService {
   }
 
   private setupContextMenus() {
-    const createOrUpdateMenu = async () => {
-      try {
-        const data = await this.getStorageData();
-        const enabled = data.enabled !== undefined ? data.enabled : true;
-        chrome.contextMenus.removeAll(() => {
-          chrome.contextMenus.create({
-            id: 'toggle-autofill',
-            title: enabled ? 'Disable Form AutoFiller' : 'Enable Form AutoFiller',
-            contexts: ['page', 'editable', 'selection']
-          });
+    const createMenu = () => {
+      chrome.contextMenus.removeAll(() => {
+        chrome.contextMenus.create({
+          id: 'fill-forms-now',
+          title: 'Fill Forms Now',
+          contexts: ['page', 'editable', 'selection']
         });
-      } catch (e) {
-        console.error('Failed to create context menu', e);
-      }
+      });
     };
 
-    // Initial create and keep in sync
     chrome.runtime.onInstalled.addListener(() => {
-      createOrUpdateMenu();
+      createMenu();
     });
-    createOrUpdateMenu();
-
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'local' && changes.enabled) {
-        createOrUpdateMenu();
-      }
-    });
+    createMenu();
 
     chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-      if (info.menuItemId === 'toggle-autofill') {
+      if (info.menuItemId === 'fill-forms-now' && tab?.id) {
         try {
-          const data = await this.getStorageData();
-          const newEnabled = !data.enabled;
-          await chrome.storage.local.set({ ...data, enabled: newEnabled });
-
-          // When enabling, inject content script into the current tab
-          if (newEnabled && tab?.id) {
-            try {
-              await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['dist/content.js']
-              });
-            } catch (err) {
-              console.error('Failed to inject content script:', err);
-            }
-          }
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['dist/content.js']
+          });
         } catch (err) {
-          console.error('Failed to toggle enabled via context menu:', err);
+          console.error('Failed to inject content script:', err);
         }
       }
     });
@@ -433,7 +409,7 @@ class BackgroundService {
   }
 
   private async getStorageData(): Promise<StorageData> {
-    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'activeLlmConfig', 'llmConfigs', 'llmConfig', 'enabled']);
+    const result = await chrome.storage.local.get(['profiles', 'activeProfileId', 'activeLlmConfig', 'llmConfigs', 'llmConfig']);
 
     // Migrate legacy llmConfig -> activeLlmConfig/llmConfigs
     let activeLlmConfig: LLMConfig | undefined = result.activeLlmConfig;
@@ -448,8 +424,7 @@ class BackgroundService {
       profiles: result.profiles || [],
       activeProfileId: result.activeProfileId || null,
       activeLlmConfig: activeLlmConfig || this.getDefaultLLMConfig(),
-      llmConfigs: llmConfigs || {},
-      enabled: result.enabled !== undefined ? result.enabled : false
+      llmConfigs: llmConfigs || {}
     } as StorageData;
   }
 

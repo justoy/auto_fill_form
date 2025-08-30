@@ -17,7 +17,7 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
 - 🔒 Privacy‑first: personal data stays local; only form structure sent to LLMs
 - 📝 Automatic form detection: detects `<form>` and form‑like containers
 - ⚡ Tab‑to‑accept: suggestions shown; press Tab to fill and advance
-- 🖱️ Right‑click toggle: enable/disable globally from the page context menu
+- 🖱️ Right‑click trigger: run “Fill Forms Now” on the current page
 - 📂 Organized categories: Personal, Address, Passport, and custom
 - 👥 Multiple profiles: create, switch, import/export
 
@@ -54,9 +54,9 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
    - Enter your API key
    - Click "Save LLM Configuration"
 
-2. **Enable Auto‑Fill (via right‑click):**
-   - Right‑click any page and choose "Enable Form AutoFiller"
-   - Auto‑fill stays enabled globally until you disable it from the same menu
+2. **Run Auto‑Fill (via right‑click):**
+   - Right‑click any page and choose "Fill Forms Now"
+   - This injects the content script once for the current tab
 
 3. **Set up your profile:**
    - **Create a Profile**: Click "Create Profile" and give it a name (e.g., "Work", "Personal", "Travel")
@@ -72,20 +72,19 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
 ## Usage
 
 1. **Navigate to any web page with forms**
-2. If enabled, **auto‑fill suggestions appear** as gray placeholder text
+2. After triggering, **auto‑fill suggestions appear** as gray placeholder text
 3. **Press Tab to accept** and move to the next field
 4. **Continue pressing Tab** to accept additional suggestions or type to override them
 5. **Submit the form** when you're satisfied with the filled data
 
-### Enable/Disable
+### Triggering
 
-- Enable: Right‑click page → "Enable Form AutoFiller"
-- Disable: Right‑click page → "Disable Form AutoFiller"
-- Note: Auto‑fill is off by default on fresh install
+- Right‑click page → "Fill Forms Now" to run a one‑time fill on the current tab
+- Re‑run the action on new pages or after significant page changes if needed
 
 ## How It Works
 
-1. **Activation**: When enabled from the context menu, the content script is injected into the current tab and runs on future pages while enabled
+1. **Activation**: When you choose "Fill Forms Now", the content script is injected into the current tab and performs a one‑time pass (with a short dynamic observer window)
 2. **LLM Analysis**: When a form is detected, its HTML structure (without values) is sent to the selected LLM for analysis
 3. **Field Mapping**: The LLM returns a mapping of form fields to your active profile's field keys
 4. **Suggestion Display**: Matching profile data appears as gray placeholder text in form fields
@@ -124,8 +123,7 @@ The extension supports multiple profiles with organized categories for better da
 - Supported formats:
   - Current format with categories and fields
   - Legacy flat key/value JSON (will be placed under an "Imported" category)
--
-  The imported profile is saved as a new profile; you can rename it during import.
+- The imported profile is saved as a new profile; you can rename it during import.
 
 ## Privacy & Security
 
@@ -152,46 +150,14 @@ src/
         ├── openai.ts              # OpenAI integration
         ├── anthropic.ts           # Anthropic integration
         └── google.ts              # Google Gemini integration
-
-## Publish to Chrome Web Store
-
-1. Build: `npm run build`
-2. Zip: from repo root, `zip -r release.zip manifest.json settings.html icons dist -x "*/.*"`
-3. Upload: Chrome Web Store Developer Dashboard → New item → upload `release.zip`
-4. Fill listing: description, screenshots, icon, privacy policy, and data disclosure
-5. Submit for review. For updates, bump `version` in `manifest.json`, rebuild, re‑zip, and upload a new draft
-
-## Screenshots & GIFs
-
-- Recommended sizes for the Chrome Web Store:
-  - Screenshots: 1280×800 (or 640×400 minimum)
-  - Promotional tile (optional): 1280×800
-- Suggested shots to include:
-  - Context menu: right‑click showing “Enable/Disable Form AutoFiller”
-  - Options page: LLM configuration and profiles
-  - On‑page demo: Auto‑fill suggestions appearing and Tab acceptance
-
-Add your assets to `docs/media/` and reference them like:
-
 ```
-![Context Menu](docs/media/context-menu.png)
-![Options](docs/media/options.png)
-![Auto‑Fill Demo](docs/media/auto-fill-demo.gif)
-```
-
-Tip to record a GIF (macOS): Record with QuickTime (screen recording), convert to GIF with `gifski` or `ffmpeg` → `imagemagick`.
 
 ## Privacy Policy
-
-This project includes a ready‑to‑publish privacy policy template at `PRIVACY.md`. Host it (e.g., GitHub Pages) and use its URL in your Chrome Web Store listing.
-
-Key points (see full policy):
+Key points (see full policy in PRIVACY.md):
 - Personal profile data stays local in Chrome storage.
 - Only form structure (no user values) is sent to the configured LLM provider (OpenAI/Anthropic/Google) to compute field mappings.
 - No selling or sharing of data for advertising; no third‑party ads.
 - You can enable/disable at any time via the right‑click menu and delete data by removing the extension or clearing extension storage.
-
-```
 
 ## License
 

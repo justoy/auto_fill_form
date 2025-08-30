@@ -7,7 +7,7 @@ This Privacy Policy describes how the Seamless Form AutoFiller Chrome extension 
 Information Processed by the Extension (not collected by the developer)
 - Profile data you enter: Stored locally in your browser via Chrome’s `chrome.storage.local`. The developer does not receive or have access to this data. It remains on your device unless you export it yourself.
 - Form structure only: When you trigger auto‑fill, the Extension may send the HTML structure of a detected form (field names/labels and DOM structure, not your personal values) directly from your browser to your selected LLM provider (OpenAI, Anthropic, or Google) to compute a field mapping. The developer does not receive these requests or responses.
-- Usage state: Basic settings (e.g., whether auto‑fill is enabled) are stored locally in your browser.
+- Usage state: Minimal settings are stored locally (e.g., provider selection and API key). There is no persistent global on/off state; auto‑fill is triggered manually via right‑click.
 
 No Developer Collection or Servers
 - The developer does not collect, receive, or store any personal information, form contents, or API keys.
