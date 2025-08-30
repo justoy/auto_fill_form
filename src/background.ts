@@ -8,6 +8,7 @@ class BackgroundService {
     this.setupMessageListener();
     this.setupActionListener();
     this.initializeLLMService();
+    this.setupContextMenus();
   }
 
   private setupMessageListener() {
@@ -22,6 +23,60 @@ class BackgroundService {
   private setupActionListener() {
     chrome.action.onClicked.addListener(() => {
       chrome.runtime.openOptionsPage();
+    });
+  }
+
+  private setupContextMenus() {
+    const createOrUpdateMenu = async () => {
+      try {
+        const data = await this.getStorageData();
+        const enabled = data.enabled !== undefined ? data.enabled : true;
+        chrome.contextMenus.removeAll(() => {
+          chrome.contextMenus.create({
+            id: 'toggle-autofill',
+            title: enabled ? 'Disable Form AutoFiller' : 'Enable Form AutoFiller',
+            contexts: ['page', 'editable', 'selection']
+          });
+        });
+      } catch (e) {
+        console.error('Failed to create context menu', e);
+      }
+    };
+
+    // Initial create and keep in sync
+    chrome.runtime.onInstalled.addListener(() => {
+      createOrUpdateMenu();
+    });
+    createOrUpdateMenu();
+
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === 'local' && changes.enabled) {
+        createOrUpdateMenu();
+      }
+    });
+
+    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+      if (info.menuItemId === 'toggle-autofill') {
+        try {
+          const data = await this.getStorageData();
+          const newEnabled = !data.enabled;
+          await chrome.storage.local.set({ ...data, enabled: newEnabled });
+
+          // When enabling, inject content script into the current tab
+          if (newEnabled && tab?.id) {
+            try {
+              await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['dist/content.js']
+              });
+            } catch (err) {
+              console.error('Failed to inject content script:', err);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to toggle enabled via context menu:', err);
+        }
+      }
     });
   }
 
@@ -394,7 +449,7 @@ class BackgroundService {
       activeProfileId: result.activeProfileId || null,
       activeLlmConfig: activeLlmConfig || this.getDefaultLLMConfig(),
       llmConfigs: llmConfigs || {},
-      enabled: result.enabled !== undefined ? result.enabled : true
+      enabled: result.enabled !== undefined ? result.enabled : false
     } as StorageData;
   }
 

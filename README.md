@@ -1,28 +1,25 @@
 # Seamless Form AutoFiller Chrome Extension
 
-A powerful Chrome extension that uses Large Language Models to automatically detect and suggest completions for web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection with tab-key confirmation for enhanced productivity.
+A powerful Chrome extension that uses Large Language Models to detect and suggest completions for web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection with tab‑key confirmation for enhanced productivity.
 
 ## What's New 🚀
 
-- **⚡ Auto-Fill with Tab Confirmation**: Forms are automatically detected and filled with suggestions - press Tab to accept
-- **🎛️ Enable/Disable Toggle**: Easy toggle in the Settings to turn auto-fill on/off
-- **📂 Profile Categories**: Organize your data into logical groups (Personal, Address, Passport, etc.)
-- **👥 Multiple Profiles**: Create separate profiles for work, personal, travel, and more
-- **🎛️ Simplified Field Management**: Just enter field names - keys are auto-generated
-- **🔄 Smart Profile Switching**: Easy dropdown to switch between different contexts
-- **🏗️ Enhanced Architecture**: Improved data structure with backward compatibility
+- ⚡ Auto‑fill with Tab confirmation: suggestions appear; press Tab to accept
+- 🖱️ Right‑click to enable/disable: global toggle via context menu (off by default)
+- 📂 Profile categories: organize data (Personal, Address, Passport, etc.)
+- 👥 Multiple profiles: separate profiles for work, personal, travel
+- 🧩 Simplified field management: enter names; keys auto‑generated
+- 🔄 Smart profile switching: quick dropdown between contexts
 
 ## Features
 
-- 🤖 **LLM-Powered Field Mapping**: Uses LLM models to understand form fields
-- 🔒 **Privacy-First**: All personal data stays local, only form structure is sent to LLM
-- 📝 **Automatic Form Detection**: Automatically detects both `<form>` elements and form-like containers
-- ⚡ **Auto-Fill with Tab Confirmation**: Forms are filled with suggestions automatically - press Tab to accept
-- 🎛️ **Enable/Disable Toggle**: Easy toggle to turn auto-fill on/off as needed
-- 📂 **Organized Profile Categories**: Fields grouped into logical categories (Personal, Address, Passport, etc.)
-- 👥 **Multiple Profile Management**: Create and switch between different profiles for various use cases
-- 🎛️ **Easy Field Management**: Add custom fields with simple name entry - field keys auto-generated
-- 🏷️ **Smart Field Organization**: Auto-categorize and manage your profile data efficiently
+- 🤖 LLM‑powered field mapping: understands form fields and maps to your profile
+- 🔒 Privacy‑first: personal data stays local; only form structure sent to LLMs
+- 📝 Automatic form detection: detects `<form>` and form‑like containers
+- ⚡ Tab‑to‑accept: suggestions shown; press Tab to fill and advance
+- 🖱️ Right‑click toggle: enable/disable globally from the page context menu
+- 📂 Organized categories: Personal, Address, Passport, and custom
+- 👥 Multiple profiles: create, switch, import/export
 
 ## Installation
 
@@ -51,15 +48,15 @@ A powerful Chrome extension that uses Large Language Models to automatically det
 
 ## Setup
 
-1. **Configure OpenAI API:**
+1. **Configure LLM API:**
    - Click the extension icon in Chrome toolbar
-   - Enter your OpenAI API key
-   - Select your preferred model
+   - Choose provider (OpenAI, Anthropic, Google)
+   - Enter your API key
    - Click "Save LLM Configuration"
 
-2. **Enable Auto-Fill:**
-   - Check the "Enable Auto-Fill" toggle in the General Settings section
-   - The extension will automatically detect and suggest completions for forms
+2. **Enable Auto‑Fill (via right‑click):**
+   - Right‑click any page and choose "Enable Form AutoFiller"
+   - Auto‑fill stays enabled globally until you disable it from the same menu
 
 3. **Set up your profile:**
    - **Create a Profile**: Click "Create Profile" and give it a name (e.g., "Work", "Personal", "Travel")
@@ -75,21 +72,21 @@ A powerful Chrome extension that uses Large Language Models to automatically det
 ## Usage
 
 1. **Navigate to any web page with forms**
-2. **Auto-fill suggestions appear automatically** in form fields as gray placeholder text
-3. **Press Tab to accept** a suggestion and move to the next field
+2. If enabled, **auto‑fill suggestions appear** as gray placeholder text
+3. **Press Tab to accept** and move to the next field
 4. **Continue pressing Tab** to accept additional suggestions or type to override them
 5. **Submit the form** when you're satisfied with the filled data
 
-### Enable/Disable Auto-Fill
+### Enable/Disable
 
-- **Enable**: Check the "Enable Auto-Fill" toggle in the extension settings
-- **Disable**: Uncheck the toggle to stop automatic form detection
-- **Quick Toggle**: Access the extension settings by clicking the extension icon in your browser toolbar
+- Enable: Right‑click page → "Enable Form AutoFiller"
+- Disable: Right‑click page → "Disable Form AutoFiller"
+- Note: Auto‑fill is off by default on fresh install
 
 ## How It Works
 
-1. **Automatic Form Detection**: The extension continuously scans pages for `<form>` elements and form-like containers with multiple input fields
-2. **LLM Analysis**: When a form is detected, its HTML structure (without values) is sent to OpenAI for analysis
+1. **Activation**: When enabled from the context menu, the content script is injected into the current tab and runs on future pages while enabled
+2. **LLM Analysis**: When a form is detected, its HTML structure (without values) is sent to the selected LLM for analysis
 3. **Field Mapping**: The LLM returns a mapping of form fields to your active profile's field keys
 4. **Suggestion Display**: Matching profile data appears as gray placeholder text in form fields
 5. **Tab Confirmation**: Press **Tab** to accept a suggestion, which fills the field and moves focus to the next input
@@ -132,11 +129,11 @@ The extension supports multiple profiles with organized categories for better da
 
 ## Privacy & Security
 
-- ✅ **Personal data never leaves your device** - only stored in Chrome's local storage
-- ✅ **Only form structure sent to LLM** - no personal values or user-entered data
-- ✅ **Enable/Disable control** - you have full control over when auto-fill is active
-- ✅ **Tab confirmation required** - suggestions are shown but require explicit Tab confirmation to fill
-- ✅ **Automatic processing** - only when enabled and forms are detected on pages you visit
+- ✅ Personal data never leaves your device — stored in Chrome local storage
+- ✅ Only form structure sent to LLM — no personal values or user‑entered data
+- ✅ Off by default — enable/disable from right‑click context menu
+- ✅ Tab confirmation required — no silent filling
+- ✅ Runs only when enabled — content script checks the global enabled flag
 
 ## Development
 
@@ -144,13 +141,25 @@ The extension supports multiple profiles with organized categories for better da
 
 ```
 src/
-├── background.ts       # Service worker for LLM API calls and profile management
-├── content.ts          # Content script for form detection and filling
-├── settings.ts         # Settings page UI for profile and configuration management
-├── types.ts            # TypeScript type definitions (profiles, categories, LLM config)
-├── form-filler.ts      # Form filling logic with profile compatibility
+├── background.ts        # Service worker: LLM calls, profiles, context menu toggle, injection
+├── content.ts           # Content script: form detection/filling, respects enabled flag
+├── settings.ts          # Options UI: LLM configuration and profile management
+├── types.ts             # Type definitions (profiles, categories, LLM config)
+├── form-filler.ts       # Form filling logic with profile compatibility
 └── llm/
-    └── openai.ts       # OpenAI API integration
+    ├── provider-factory.ts        # Chooses provider (OpenAI/Anthropic/Google)
+    └── providers/
+        ├── openai.ts              # OpenAI integration
+        ├── anthropic.ts           # Anthropic integration
+        └── google.ts              # Google Gemini integration
+
+## Publish to Chrome Web Store
+
+1. Build: `npm run build`
+2. Zip: from repo root, `zip -r release.zip manifest.json settings.html icons dist -x "*/.*"`
+3. Upload: Chrome Web Store Developer Dashboard → New item → upload `release.zip`
+4. Fill listing: description, screenshots, icon, privacy policy, and data disclosure
+5. Submit for review. For updates, bump `version` in `manifest.json`, rebuild, re‑zip, and upload a new draft
 ```
 
 ## License

@@ -15,7 +15,7 @@ class SettingsManager {
     provider: 'openai',
     apiKey: ''
   };
-  private enabled: boolean = true;
+  private enabled: boolean = false;
 
   constructor() {
     this.init();
