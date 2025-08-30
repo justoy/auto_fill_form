@@ -1,0 +1,86 @@
+{
+  "format": "form-autofill-profile",
+  "version": 1,
+  "exportedAt": "2025-08-30T00:00:00.000Z",
+  "profile": {
+    "id": "test_profile_001",
+    "name": "Test Profile",
+    "createdAt": "2025-08-01T12:00:00.000Z",
+    "updatedAt": "2025-08-15T12:00:00.000Z",
+    "categories": [
+      {
+        "id": "personal",
+        "name": "Personal Information",
+        "fields": [
+          { "key": "first_name", "label": "First Name", "value": "John" },
+          { "key": "last_name", "label": "Last Name", "value": "Doe" },
+          { "key": "email", "label": "Email", "value": "john.doe@example.com" },
+          { "key": "phone", "label": "Phone", "value": "+1 555-123-4567" }
+        ]
+      },
+      {
+        "id": "address",
+        "name": "Address",
+        "fields": [
+          { "key": "addr_line1", "label": "Address Line 1", "value": "123 Main St" },
+          { "key": "addr_line2", "label": "Address Line 2", "value": "Apt 4B" },
+          { "key": "city", "label": "City", "value": "Springfield" },
+          { "key": "state", "label": "State", "value": "CA" },
+          { "key": "postal_code", "label": "Postal Code", "value": "94107" },
+          { "key": "country", "label": "Country", "value": "USA" }
+        ]
+      },
+      {
+        "id": "passport",
+        "name": "Passport",
+        "fields": [
+          { "key": "passport_num", "label": "Passport Number", "value": "X12345678" },
+          { "key": "passport_country", "label": "Passport Country", "value": "USA" },
+          { "key": "nationality", "label": "Nationality", "value": "American" },
+          { "key": "passport_issue_place", "label": "Place of Issue", "value": "San Francisco" },
+          { "key": "passport_issue_date", "label": "Issue Date", "value": "2018-05-20" },
+          { "key": "passport_expiry_date", "label": "Expiry Date", "value": "2028-05-20" }
+        ]
+      },
+      {
+        "id": "employment",
+        "name": "Employment",
+        "fields": [
+          { "key": "company_name", "label": "Company Name", "value": "Acme Corp" },
+          { "key": "job_title", "label": "Job Title", "value": "Senior Engineer" },
+          { "key": "work_email", "label": "Work Email", "value": "john.doe@acme.com" },
+          { "key": "work_phone", "label": "Work Phone", "value": "+1 555-987-6543" }
+        ]
+      },
+      {
+        "id": "payment",
+        "name": "Payment",
+        "fields": [
+          { "key": "card_name", "label": "Name on Card", "value": "JOHN A DOE" },
+          { "key": "card_number", "label": "Card Number", "value": "4242424242424242" },
+          { "key": "card_expiry", "label": "Expiry", "value": "12/28" },
+          { "key": "card_cvv", "label": "CVV", "value": "123" },
+          { "key": "billing_zip", "label": "Billing ZIP", "value": "94107" }
+        ]
+      },
+      {
+        "id": "social",
+        "name": "Social",
+        "fields": [
+          { "key": "twitter_handle", "label": "Twitter Handle", "value": "@johndoe" },
+          { "key": "linkedin_url", "label": "LinkedIn URL", "value": "https://www.linkedin.com/in/johndoe" },
+          { "key": "website", "label": "Website", "value": "https://johndoe.dev" }
+        ]
+      },
+      {
+        "id": "education",
+        "name": "Education",
+        "fields": [
+          { "key": "school_name", "label": "School Name", "value": "State University" },
+          { "key": "degree", "label": "Degree", "value": "B.S. Computer Science" },
+          { "key": "graduation_year", "label": "Graduation Year", "value": "2015" }
+        ]
+      }
+    ]
+  }
+}

@@ -121,6 +121,15 @@ The extension supports multiple profiles with organized categories for better da
 - Each profile maintains its own data independently
 - Perfect for different contexts (work vs personal vs travel)
 
+### Export/Import Profiles
+- Export: Click "Export" in Profile Management to download the active profile as JSON
+- Import: Click "Import" and select a JSON file to create a new profile
+- Supported formats:
+  - Current format with categories and fields
+  - Legacy flat key/value JSON (will be placed under an "Imported" category)
+-
+  The imported profile is saved as a new profile; you can rename it during import.
+
 ## Privacy & Security
 
 - ✅ **Personal data never leaves your device** - only stored in Chrome's local storage

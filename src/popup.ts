@@ -6,6 +6,7 @@ import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderP
 import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './popup/ui/enabled';
 import { renderProfileSelector as uiRenderProfileSelector, bindProfileActions } from './popup/ui/profile-select';
 import { renderProfileEditor as uiRenderProfileEditor, bindProfileEditor, addCategoryToProfile, addFieldToCategory as modelAddFieldToCategory, removeCategoryFromProfile, removeFieldFromCategory, updateFieldValueInProfile } from './popup/ui/profile-editor';
+import { generateId } from './popup/utils';
 
 class PopupManager {
   private profiles: UserProfile[] = [];
@@ -83,6 +84,14 @@ class PopupManager {
     });
 
     bindProfileEditor(() => this.addCategory());
+
+    // Export/Import
+    document.getElementById('exportProfile')?.addEventListener('click', () => this.exportActiveProfile());
+    document.getElementById('importProfile')?.addEventListener('click', () => {
+      (document.getElementById('importProfileInput') as HTMLInputElement)?.click();
+    });
+    const importInput = document.getElementById('importProfileInput') as HTMLInputElement | null;
+    importInput?.addEventListener('change', (e) => this.handleImportInputChange(e));
   }
 
   private renderUI() {
@@ -332,6 +341,129 @@ class PopupManager {
 
   private showStatus(message: string, type: 'success' | 'error') {
     showStatusToast(message, type);
+  }
+
+  private exportActiveProfile() {
+    if (!this.activeProfile) {
+      this.showStatus('No profile selected', 'error');
+      return;
+    }
+
+    // Prepare export payload
+    const payload = {
+      format: 'form-autofill-profile',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      profile: {
+        ...this.activeProfile,
+        // Ensure dates are strings for portability
+        createdAt: this.activeProfile.createdAt instanceof Date ? this.activeProfile.createdAt.toISOString() : this.activeProfile.createdAt,
+        updatedAt: this.activeProfile.updatedAt instanceof Date ? this.activeProfile.updatedAt.toISOString() : this.activeProfile.updatedAt,
+      }
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = this.sanitizeFilename(this.activeProfile.name || 'profile');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `profile-${safeName}-${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    this.showStatus('Profile exported', 'success');
+  }
+
+  private sanitizeFilename(name: string) {
+    return name.replace(/[^a-z0-9-_]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 80);
+  }
+
+  private async handleImportInputChange(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    input.value = '';
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Unwrap if needed
+      const importedProfile = this.extractProfileFromImport(data);
+      if (!importedProfile) {
+        this.showStatus('Invalid profile file', 'error');
+        return;
+      }
+
+      // Prompt for name; default to file name or embedded name
+      const defaultName = (importedProfile as any).name || file.name.replace(/\.json$/i, '') || 'Imported Profile';
+      const name = prompt('Name for imported profile:', defaultName) || defaultName;
+
+      // Build a new profile object using imported categories if present
+      const newProfile: UserProfile = {
+        id: generateId(),
+        name: name.trim() || 'Imported Profile',
+        categories: this.buildCategoriesFromImported(importedProfile),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Create then update to persist full data and set active
+      const createResp = await api.createProfile(newProfile.name);
+      if (!createResp.success || !createResp.profile) {
+        throw new Error(createResp.error || 'Failed to create profile');
+      }
+
+      const saved = createResp.profile as UserProfile;
+      const toSave: UserProfile = { ...saved, categories: newProfile.categories, name: newProfile.name, updatedAt: new Date() };
+      const updateResp = await api.updateProfile(toSave);
+      if (!updateResp.success) {
+        throw new Error(updateResp.error || 'Failed to save imported profile');
+      }
+
+      // Set as active
+      await api.setActiveProfile(saved.id);
+      await this.loadProfiles();
+      this.renderUI();
+      this.showStatus('Profile imported successfully', 'success');
+    } catch (err) {
+      console.error('Import failed:', err);
+      this.showStatus('Failed to import profile', 'error');
+    }
+  }
+
+  private extractProfileFromImport(data: any): any {
+    // Supports wrapped { format, version, profile } or raw object
+    const candidate = data && data.profile ? data.profile : data;
+    if (!candidate || typeof candidate !== 'object') return null;
+    return candidate;
+  }
+
+  private buildCategoriesFromImported(obj: any) {
+    // If looks like new format (has categories array with fields), use it
+    if (obj && Array.isArray(obj.categories)) {
+      // Ensure each category has an id and fields structure
+      return (obj.categories as any[]).map((cat, idx) => ({
+        id: typeof cat.id === 'string' ? cat.id : `cat_${idx}_${generateId()}`,
+        name: typeof cat.name === 'string' ? cat.name : `Category ${idx + 1}`,
+        fields: Array.isArray(cat.fields)
+          ? cat.fields.map((f: any) => ({ key: String(f.key), value: String(f.value ?? ''), label: f.label ? String(f.label) : undefined }))
+          : [],
+      }));
+    }
+
+    // Otherwise treat as legacy flat key-value map
+    const fields = Object.entries(obj || {}).map(([key, value]) => ({ key: String(key), value: String(value ?? ''), label: key }));
+    return [
+      {
+        id: `imported_${generateId()}`,
+        name: 'Imported',
+        fields,
+      },
+    ];
   }
 
   private async handleApiCall<T extends { success?: boolean; error?: string }>(
