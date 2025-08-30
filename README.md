@@ -160,6 +160,37 @@ src/
 3. Upload: Chrome Web Store Developer Dashboard → New item → upload `release.zip`
 4. Fill listing: description, screenshots, icon, privacy policy, and data disclosure
 5. Submit for review. For updates, bump `version` in `manifest.json`, rebuild, re‑zip, and upload a new draft
+
+## Screenshots & GIFs
+
+- Recommended sizes for the Chrome Web Store:
+  - Screenshots: 1280×800 (or 640×400 minimum)
+  - Promotional tile (optional): 1280×800
+- Suggested shots to include:
+  - Context menu: right‑click showing “Enable/Disable Form AutoFiller”
+  - Options page: LLM configuration and profiles
+  - On‑page demo: Auto‑fill suggestions appearing and Tab acceptance
+
+Add your assets to `docs/media/` and reference them like:
+
+```
+![Context Menu](docs/media/context-menu.png)
+![Options](docs/media/options.png)
+![Auto‑Fill Demo](docs/media/auto-fill-demo.gif)
+```
+
+Tip to record a GIF (macOS): Record with QuickTime (screen recording), convert to GIF with `gifski` or `ffmpeg` → `imagemagick`.
+
+## Privacy Policy
+
+This project includes a ready‑to‑publish privacy policy template at `PRIVACY.md`. Host it (e.g., GitHub Pages) and use its URL in your Chrome Web Store listing.
+
+Key points (see full policy):
+- Personal profile data stays local in Chrome storage.
+- Only form structure (no user values) is sent to the configured LLM provider (OpenAI/Anthropic/Google) to compute field mappings.
+- No selling or sharing of data for advertising; no third‑party ads.
+- You can enable/disable at any time via the right‑click menu and delete data by removing the extension or clearing extension storage.
+
 ```
 
 ## License

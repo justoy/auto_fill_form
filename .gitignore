@@ -52,3 +52,6 @@ tmp/
 temp/
 *.log
 *.bak
+
+# condex
+.codex/
