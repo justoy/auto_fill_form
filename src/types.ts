@@ -55,7 +55,6 @@ export interface StorageData {
   activeLlmConfig: LLMConfig;
   // Persist keys per provider so switching does not lose them
   llmConfigs: Partial<Record<LLMProvider, LLMConfig>>;
-  enabled: boolean;
 }
 
 // For backward compatibility with existing code

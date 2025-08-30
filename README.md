@@ -5,7 +5,7 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
 ## What's New 🚀
 
 - ⚡ Auto‑fill with Tab confirmation: suggestions appear; press Tab to accept
-- 🖱️ Right‑click to enable/disable: global toggle via context menu (off by default)
+- 🖱️ Right‑click trigger: one‑time “Fill Forms Now” on the current page
 - 📂 Profile categories: organize data (Personal, Address, Passport, etc.)
 - 👥 Multiple profiles: separate profiles for work, personal, travel
 - 🧩 Simplified field management: enter names; keys auto‑generated
@@ -129,9 +129,9 @@ The extension supports multiple profiles with organized categories for better da
 
 - ✅ Personal data never leaves your device — stored in Chrome local storage
 - ✅ Only form structure sent to LLM — no personal values or user‑entered data
-- ✅ Off by default — enable/disable from right‑click context menu
+- ✅ On‑demand only — trigger via right‑click; no persistent on/off state
 - ✅ Tab confirmation required — no silent filling
-- ✅ Runs only when enabled — content script checks the global enabled flag
+- ✅ One‑shot injection — content script runs briefly and stops
 
 ## Development
 
@@ -139,8 +139,8 @@ The extension supports multiple profiles with organized categories for better da
 
 ```
 src/
-├── background.ts        # Service worker: LLM calls, profiles, context menu toggle, injection
-├── content.ts           # Content script: form detection/filling, respects enabled flag
+├── background.ts        # Service worker: LLM calls, profiles, context menu action, injection
+├── content.ts           # Content script: form detection/filling, one‑shot run
 ├── settings.ts          # Options UI: LLM configuration and profile management
 ├── types.ts             # Type definitions (profiles, categories, LLM config)
 ├── form-filler.ts       # Form filling logic with profile compatibility
@@ -157,7 +157,7 @@ Key points (see full policy in PRIVACY.md):
 - Personal profile data stays local in Chrome storage.
 - Only form structure (no user values) is sent to the configured LLM provider (OpenAI/Anthropic/Google) to compute field mappings.
 - No selling or sharing of data for advertising; no third‑party ads.
-- You can enable/disable at any time via the right‑click menu and delete data by removing the extension or clearing extension storage.
+- You trigger filling via the right‑click menu. There is no persistent on/off state. Delete data by removing the extension or clearing extension storage.
 
 ## License
 

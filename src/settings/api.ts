@@ -22,14 +22,6 @@ export async function saveLLMConfig(config: LLMConfig) {
   return sendMessage({ action: 'SAVE_LLM_CONFIG', config });
 }
 
-export async function getEnabled() {
-  return sendMessage<{ enabled: boolean }>({ action: 'GET_ENABLED' });
-}
-
-export async function saveEnabled(enabled: boolean) {
-  return sendMessage({ action: 'SAVE_ENABLED', enabled });
-}
-
 export async function getProfiles() {
   return sendMessage<{ profiles: UserProfile[] }>({ action: 'GET_PROFILES' });
 }
@@ -53,5 +45,4 @@ export async function updateProfile(profile: UserProfile) {
 export async function deleteProfile(profileId: string) {
   return sendMessage({ action: 'DELETE_PROFILE', profileId });
 }
-
 

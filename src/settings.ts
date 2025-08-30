@@ -3,7 +3,6 @@ import { showStatus as showStatusToast } from './settings/ui/status';
 import { setButtonState } from './settings/ui/button-animations';
 import * as api from './settings/api';
 import { renderLLMConfig as uiRenderLLMConfig, renderProviderConfig as uiRenderProviderConfig } from './settings/ui/llm-config';
-import { renderEnabled as uiRenderEnabled, bindEnabledToggle } from './settings/ui/enabled';
 import { renderProfileSelector as uiRenderProfileSelector, bindProfileActions } from './settings/ui/profile-select';
 import { renderProfileEditor as uiRenderProfileEditor, bindProfileEditor, addCategoryToProfile, addFieldToCategory as modelAddFieldToCategory, removeCategoryFromProfile, removeFieldFromCategory, updateFieldValueInProfile } from './settings/ui/profile-editor';
 import { generateId } from './settings/utils';
@@ -15,7 +14,6 @@ class SettingsManager {
     provider: 'openai',
     apiKey: ''
   };
-  private enabled: boolean = false;
 
   constructor() {
     this.init();
@@ -34,10 +32,6 @@ class SettingsManager {
         this.llmConfig = configResponse.config;
       }
 
-      const enabledResponse = await api.getEnabled();
-      if (enabledResponse.success) {
-        this.enabled = enabledResponse.enabled;
-      }
 
       await this.loadProfiles();
     } catch (error) {
@@ -63,9 +57,6 @@ class SettingsManager {
   }
 
   private setupEventListeners() {
-    // General Settings
-    bindEnabledToggle((enabled) => this.saveEnabled(enabled));
-
     // LLM Configuration
     document.getElementById('providerSelect')?.addEventListener('change', async (e) => {
       await this.onProviderSelect((e.target as HTMLSelectElement).value);
@@ -95,14 +86,9 @@ class SettingsManager {
   }
 
   private renderUI() {
-    this.renderEnabledSetting();
     this.renderLLMConfig();
     this.renderProfileSelector();
     this.renderProfile();
-  }
-
-  private renderEnabledSetting() {
-    uiRenderEnabled(this.enabled);
   }
 
   private renderLLMConfig() {
@@ -284,22 +270,6 @@ class SettingsManager {
     updateFieldValueInProfile(this.activeProfile, categoryId, fieldKey, value);
   }
 
-  private async saveEnabled(enabled: boolean) {
-    this.enabled = enabled;
-
-    try {
-      const response = await api.saveEnabled(enabled);
-
-      if (response.success) {
-        this.showStatus(`Auto-fill ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
-      } else {
-        this.showStatus(response.error || 'Failed to save setting', 'error');
-      }
-    } catch (error) {
-      console.error('Failed to save enabled setting:', error);
-      this.showStatus('Failed to save setting', 'error');
-    }
-  }
 
   private async saveLLMConfig() {
     const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
