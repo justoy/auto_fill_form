@@ -2,6 +2,8 @@
 
 A powerful Chrome extension that uses Large Language Models to detect and suggest completions for web forms with intelligently organized profile data. Features multiple profile management, categorized data organization, and seamless form detection with tab‑key confirmation for enhanced productivity.
 
+![Auto‑fill Demo](docs/media/auto-fill-demo.gif)
+
 ## What's New 🚀
 
 - ⚡ Auto‑fill with Tab confirmation: suggestions appear; press Tab to accept
@@ -54,6 +56,8 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
    - Enter your API key
    - Click "Save LLM Configuration"
 
+   ![Enter API Key](docs/media/api_key.jpg)
+
 2. **Run Auto‑Fill (via right‑click):**
    - Right‑click any page and choose "Fill Forms Now"
    - This injects the content script once for the current tab
@@ -68,6 +72,8 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
    - **Add Custom Categories**: Create new categories for specific use cases
    - **Switch Profiles**: Use the dropdown to switch between different profiles
    - Click "Save Profile" to store your changes
+   
+   ![Enter API Key](docs/media/profile.jpg)
 
 ## Usage
 
@@ -77,10 +83,14 @@ A powerful Chrome extension that uses Large Language Models to detect and sugges
 4. **Continue pressing Tab** to accept additional suggestions or type to override them
 5. **Submit the form** when you're satisfied with the filled data
 
+   ![Press Tab to Accept Autofill](docs/media/accept_autofill.jpg)
+
 ### Triggering
 
 - Right‑click page → "Fill Forms Now" to run a one‑time fill on the current tab
 - Re‑run the action on new pages or after significant page changes if needed
+
+![Right‑click Trigger](docs/media/trigger_autofill.jpg)
 
 ## How It Works
 
@@ -99,6 +109,8 @@ The extension supports multiple profiles with organized categories for better da
 - Click "Create Profile" to make a new profile
 - Give it a descriptive name (e.g., "Work", "Personal", "Travel")
 - Each profile comes with pre-built categories
+
+![Profile Management](docs/media/profile.jpg)
 
 ### Organizing Data
 - **Personal Information**: Basic details like name, email, phone
